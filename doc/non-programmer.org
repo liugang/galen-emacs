@@ -1,0 +1,214 @@
+#+OPTIONS: ^:nil author:nil timestamp:nil creator:nil
+
+非程序员的Emacs使用心得
+
+#+BEGIN_HTML
+<span style="color: #0000ff;">作者: 杨博华</span><a href="http://www.cnblogs.com/doveyoung/" target="_blank"><span style="color: #0000ff;"><b>David Young</b></span></a>
+#+END_HTML
+
+
+这个标题本来是我的个人博客的标题，ahei老大偶然看见了之后觉得这个主意不错，问我说为什么不干脆就写写这个话题呢？ 好吧，这个要从为什么会有这个标题说起。话说世界上有两种人，一种是程序员，一种是非程序员。（呵呵，这是一个典型的程序员思维。如果当初不是二进制胜出的话，也许程序员也不这么想） 。至于我自己为什么要用这样一个标题呢？主要是因为，当我开始正式的使用 Emacs的时候，基本上已经不太是一个程序员了。而等我把 Emacs用的比较顺手，可以写一点什么和大家分享的时候，我已经不是程序员很久了。这就是这个标题的来历。
+
+#+HTML: <!--more-->
+
+** 关于写字
+
+那么非程序员在使用 Emacs上面和程序员有什么不同呢？最根本的区别来源于他们做的事情不一样。程序员用 Emacs，基本上会用来写程序。那么非程序员用 Emacs做什么呢？呃…… 他们，基本上用来…… *写字* 。当然了，写程序也是在写字，但是从技术层面来说，编写程序代码的不确定性会少很多。这样不仅仅对 Emacs来说处理难度相对减小了，并且在用户群体之间的技术交流和技术共享也变得容易许多了。至少比较容易找到比你还牛的人也想解决相同的问题。非程序员面临的状况可就完全不同了，因为成为非程序员，限制条件非常简单——你只要不是“程序员”，对吧？所以虽然从各种角度来说，非程序员的数量都要远远大于程序员，由于人员组成非常的广泛，人员之间的共同点就变得相当的渺茫。更何况如此众多的非程序员还分为“用 Emacs的”和“不用 Emacs的”呵呵。所以技术交流和技术共享就面临着非常大的困难。比如说我所面临的技术难题，有可能根本就没有人在意过。
+
+这就是我体会到的第一个心得。在刚一开始的时候，一切真的只有靠自己。
+
+比如说一个日常的拷贝粘贴的操作。这曾经是一个完全没有人在意的事情。现在对谁来说拷贝粘贴这种事儿不是自己身体的一部分了？这个还需要思考吗？但是，在一些“惨绝人寰”的环境里，即便是如此简单的事情也会把人逼疯的。曾经有那么一段的岁月里，我需要把成百上千条信息，每天，从一个程序贴到另一个程序里面，一条接一条。相信我，我没有在编故事，这世上有一种东西叫“不兼容”，你们懂得。比如说从 Word里面贴到 Lotus Notes里面，或者从 Lotus Notes 里面贴到 Excel 里，等等等等。这个时候我通常会先把一方的内容抓到 Emacs里面，然后再从 Emacs 里面一条一条的贴到另一个程序里面。实际上通过 Emacs中转一下也只能让事情变得稍好一点而已。Emacs 也并没有在频繁的拷贝粘贴方面做什么优化的设计。所以我就自己编写了专门针对拷贝粘贴的扩展函数。你们知道拷贝粘贴过程当中最复杂的操作是哪个部分吗？是选中！对，答对了。所以在 EmacsWiki.org 上面的 CopyWithoutSelection 是我写的。是疯以前写的。（所以因此也就终于没有疯） 有没有程序员也觉得拷贝粘贴是一件孰不可忍的事情呢？一起来握个爪吧。
+
+** 关于 Shell
+
+除了用来辅助其他程序的工作，我也在 Emacs里面干一些正事儿。主要的事情是使用 Shell。最初跑的 Emacs里面来使用 Shell的主要原因是因为字体问题。随着显示器分辨率的突然变大（我从 Dell Inspire 换到了 Thinkpad），那 X Window 里面的默认字体也突然变得无法忍受了。回想那些日子里我还在 Windows XP 上面跑 Cygwin，我可真不知道怎么样能把 FVWM 里面的字体调到合我心意。最简单的办法当然就是用 Emacs，这个东西很方便就可以调大字体。不过说到吸引力也就仅此而已了。因为那个时候 Emacs 22里面跑 Shell可是相当的不稳定，一不留神就在你的眼前崩溃给你看，是整个 Emacs都会崩掉。更何况还有 X Window，那可是 Cygwin环境。每次离开或回到座位，拔下或接上外接显示器，都必须得重启 X Window …… 
+
+但是在 Emacs里面的 Shell还是美丽的让人欲罢不能。
+
+你们知道，在 Shell操作里面绝大多数时候都是在重复的使用各种各样的信息块儿。例如说某几条命令的参数，某几个输出的结果，总之就是拷来拷去的“拼”命令，这就是最常做的事情。虽然会有各种各样的 complete，但是基本上登录到别的机器上的时候，大多数 complete 基本就不灵了，（当然，我也在用 hippie-expand，不过那个东西在 Shell当中有点儿麻烦。） 所以以前大多数时候都是在从 Shell本身的 history机制入手，直到我把 CopyWithoutSelection 也用到了 shell-mode 上面，从此各种各样的参数复制都变得前所未有的舒服了。但即便是这样，每天成百上千次的去操作也会变得让人不堪忍受的，所以我后来把 CopyWithoutSelection 改写成了在 shell-mode 里面可以连粘贴的步骤都省掉的状态。你只需要把光标放在上面，他会知道要把那些内容粘贴到什么地方去的。不是吗？那不就是粘贴到最后那条命令的最后那个参数后面吗？
+
+** 关于七日
+
+但是呢，人一旦懒了起来，就很难再变勤快了。所以后来干脆就把所有地方的粘贴动作都省掉了，操作之前先放一个 mark，然后该要的内容自动发到 mark 那里，这样是不是清爽多了呢？ 直到……直到某一天我梦想着能够随便选择一段文字，然后就能把它发送过去。呃…… 就是这个念头的产生，带来了一个更大的问题—— mark！Mark 被重置了，对吧，就在我选择那段文字的时候…… 罪过，罪过，应该无欲，无欲无求才会到达西方极乐…… 好了，不乱想了， Emacs 的 mark 是 ring 的，就像我们都熟悉的 kill-ring 一样，mark 也有一个 ring 的。我把被重置的那个 mark 弹出去就好了，之前自己设置的那个 mark 就浮上来了。好了，好了，这个世界清净了。
+
+
+** 后记 - 关于 CopyWithoutSelection
+
+这里是 [[http://www.emacswiki.org/emacs/CopyWithoutSelection][CopyWithoutSelection]] 的经济适用房。
+
+这个东西一开始的时候其实很简单。我就想偷懒让 Emacs 帮我把想要的东西拷贝到 kill-ring 里面。作为一个杰出的编辑器来说 Emacs应该知道所谓的“字”、“词”、“句”、“段落”都是什么东西，那么就完全没有道理再让我去操心这些细节了。所以我就编写了一些代码，非常简单的代码，其实就是告诉 Emacs 去做他原本就应该做的事情。
+
+*** Copy Word
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+     (defun copy-word (&optional arg)
+      "Copy words at point into kill-ring"
+       (interactive "P")
+       (copy-thing 'backward-word 'forward-word arg)
+       (paste-to-mark arg)
+     )
+</pre>
+#+END_HTML
+
+Key binding
+
+#+BEGIN_HTML
+<pre lang="lisp">
+(global-set-key (kbd "C-c w")         (quote copy-word))
+</pre>
+#+END_HTML
+
+*** Copy Line
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+     (defun copy-line (&optional arg)
+      "Save current line into Kill-Ring without mark the line "
+       (interactive "P")
+       (copy-thing 'beginning-of-line 'end-of-line arg)
+       (paste-to-mark arg)
+     )
+</pre>
+#+END_HTML
+
+Key binding
+
+#+BEGIN_HTML
+<pre lang="lisp">
+(global-set-key (kbd "C-c l")         (quote copy-line))
+</pre>
+#+END_HTML
+
+*** Copy Paragraph
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+     (defun copy-paragraph (&optional arg)
+      "Copy paragraphes at point"
+       (interactive "P")
+       (copy-thing 'backward-paragraph 'forward-paragraph arg)
+       (paste-to-mark arg)
+     )
+</pre>
+#+END_HTML
+
+Key binding
+
+#+BEGIN_HTML
+<pre lang="lisp">
+(global-set-key (kbd "C-c p")         (quote copy-paragraph))
+</pre>
+#+END_HTML
+
+弄完这三个最简单的部分之后，接下来的事情就比较复杂一些了。下面的函数一个是拷贝字符串的，另外一个是拷贝括号当中的内容的。
+
+*** Copy String
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+     (defun beginning-of-string(&optional arg)
+       "  "
+       (re-search-backward "[ \t]" (line-beginning-position) 3 1)
+     	     (if (looking-at "[\t ]")  (goto-char (+ (point) 1)) )
+     )
+     (defun end-of-string(&optional arg)
+       " "
+       (re-search-forward "[ \t]" (line-end-position) 3 arg)
+     	     (if (looking-back "[\t ]") (goto-char (- (point) 1)) )
+     )
+     
+     (defun thing-copy-string-to-mark(&optional arg)
+       " Try to copy a string and paste it to the mark
+     When used in shell-mode, it will paste string on shell prompt by default "
+       (interactive "P")
+       (copy-thing 'beginning-of-string 'end-of-string arg)
+       (paste-to-mark arg)
+     )
+</pre>
+#+END_HTML
+
+Key binding
+
+#+BEGIN_HTML
+<pre lang="lisp">
+(global-set-key (kbd "C-c s")         (quote thing-copy-string-to-mark))
+</pre>
+#+END_HTML
+
+*** Copy Parenthesis
+
+Similar with new copy string to mark
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+     (defun beginning-of-parenthesis(&optional arg)
+       "  "
+       (re-search-backward "[[<(?\"]" (line-beginning-position) 3 1)
+     	     (if (looking-at "[[<(?\"]")  (goto-char (+ (point) 1)) )
+     )
+     (defun end-of-parenthesis(&optional arg)
+       " "
+       (re-search-forward "[]>)?\"]" (line-end-position) 3 arg)
+     	     (if (looking-back "[]>)?\"]") (goto-char (- (point) 1)) )
+     )
+     
+     (defun thing-copy-parenthesis-to-mark(&optional arg)
+       " Try to copy a parenthesis and paste it to the mark
+     When used in shell-mode, it will paste parenthesis on shell prompt by default "
+       (interactive "P")
+       (copy-thing 'beginning-of-parenthesis 'end-of-parenthesis arg)
+       (paste-to-mark arg)
+     )
+</pre>
+#+END_HTML
+
+Key binding
+
+#+BEGIN_HTML
+<pre lang="lisp">
+(global-set-key (kbd "C-c a")         (quote thing-copy-parenthesis-to-mark))
+</pre>
+#+END_HTML
+
+这个地方当初还有个故事呢。当我刚把代码贴上去的时候，那个时候还写的比较初级，EmacsWiki 上的 AndyStewart 老大居然还跑过来问我，为什么不去看一下 [[http://www.emacswiki.org/emacs/ThingAtPoint][Thing At Point]] ? 其实这个原因不能再简单了——因为我不知道么。我前面说过，很多时候我都是靠自力更生的，哪里知道这么多老大啊？
+
+当然，既然老大发话了，过去看一眼吧。我不仅去看了 Thing At Point，还把 Emacs 的 =thing-edit.el= 也翻出来看了一遍，然后把偶的代码用 =thing-edit.el= 的方法全部都重写了一遍，最后偶还是觉得对付字符串这种事情还是用我最初的办法解决起来比较舒坦。就又麻烦了一回又给改回来了。不幸就是在一些函数名字上不慎留下了一些 =thing-copy= 或者 =copy-thing= 这样的痕迹了。
+
+所有以上几个函数，都依赖于下面这三个基础函数，由他们三个负责完成实际的工作。
+
+*** the base functions
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+     (defun get-point (symbol &optional arg)
+      "get the point"
+      (funcall symbol arg)
+      (point)
+     )
+     
+     (defun copy-thing (begin-of-thing end-of-thing &optional arg)
+       "copy thing between beg & end into kill ring"
+        (let ((beg (get-point begin-of-thing 1))
+     	 (end (get-point end-of-thing arg)))
+          (copy-region-as-kill beg end))
+     )
+     
+     (defun paste-to-mark(&optional arg)
+       "Paste things to mark, or to the prompt in shell-mode"
+       (let ((pasteMe 
+     	 (lambda()
+     	   (if (string= "shell-mode" major-mode)
+     	     (progn (comint-next-prompt 25535) (yank))
+     	   (progn (goto-char (mark)) (yank) )))))
+     	(if arg
+     	    (if (= arg 1)
+     		nil
+     	      (funcall pasteMe))
+     	  (funcall pasteMe))
+     	))
+     
+</pre>
+#+END_HTML
+
+实际上最终写成现在这个结构也是很多次重复之后才学会的。所以编写自己的扩展函数的时候也是很好的学习 Emacs，学习 eLisp 的时候。俗话说，生活就是一个星期日，接着另一个星期日…… Emacs 就是一个改变，接着另一个改变…… 基本上，每一个星期日，我的 Emacs 都在改变。

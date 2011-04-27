@@ -1,0 +1,285 @@
+#+OPTIONS: ^:nil author:nil timestamp:nil creator:nil
+
+Org-mode 写作的几个快捷方式
+
+#+BEGIN_HTML
+<span style="color: #0000ff;">作者: 杨博华</span><a href="http://www.cnblogs.com/doveyoung/" target="_blank"><span style="color: #0000ff;"><b>David Young</b></span></a>
+#+END_HTML
+
+GNU Emacs 一直以来就是一个写作的利器。从最初的 text-mode， muse-mode，直到今天的 org-mode，Emacs 下的写作正在变得越来越舒适，越来越具有表现力。尤其是现在的 org-mode，不仅可以 GTD，可以记笔记，甚至已经达到了“只有想不到的，没有做不到的”的境地。就连 Emacser 的各位童鞋们也都在使用 org-mode 进行写作。
+
+但是，不管到了什么时候，懒惰总是一个亘古不变的真理。懒得大发的时候，就会觉得只有把大饼套在脖子上这样的日子才是最舒服的。所以呢今天就和大家分享几个使用 org-mode 写作时候常用的偷懒的方式。
+
+#+HTML: <!--more-->
+
+org-mode 的日常操作其实已经足够方便了。标签式的书写方式效率要远高于菜单式的书写方式（例如 Word 或者现在的 WPS）。同时由于 Emacs 的强大和灵活，使得 org-mode 在古老的标签式书写的方式下，一定程度上实现了所见即所得的效果。但是，总有一些标签，由于太长，太常出现，还是难免成为写作时候的负担。这种负担不仅仅表现在输入工作量的增加上，由于很多标签是要成对出现的，配对的缺失和对这些缺失的检查和修补真可以称得上是世上最痛苦同时又最没有价值的负担。例如引用代码、样例的标签， =#+begin_src= =#+end_src= ， =#+BEGIN_EXAMPLE= =#+END_EXAMPLE= 等等 。特别是在技术类文章里面，经常需要大量引用样例、代码等等内容的时候，真的会变成“是可忍孰不可忍”了。
+
+解决这个问题，基本上有两套解决方案。一个方案是 abbrev + skeleton，一个方案就是 eLisp code 了。这两种方案无所谓孰优孰劣，只是各自解决不同的问题。指导思想都是一样的，那就是让 Emacs 去操心输入和配对儿的事情。凡事只要不用人去操心了，我们就可以暂时认为这事儿就不存在了。
+
+** skeleton
+
+Skeleton 作为一种 [[http://www.gnu.org/software/emacs/manual/html_node/autotype/index.html][自动输入]] 的好方法，主要解决的是白纸一张时候的问题，解决的思路是化繁为简。通过预先定义好的 Skeleton，将复杂、易错的配对标签替换为简短、易记的 Skeleton 标签，在输入的一开始就确保一切都井然有序，包括光标位置都让它正确定位，当标签不再需要人工配对的时候，配对就可以认为不再是个问题了。
+
+当然你也可以用 yasnippets 或者其他类似的工具。用 Skeleton 的目的只是因为它简单、直接。下面让我们看几个例子：
+
+*** iexp
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+(define-skeleton 1exp 
+  "Input #+BEGIN_EXAMPLE #+END_EXAMPLE in org-mode"
+""
+"#+BEGIN_EXAMPLE\n"
+ _ "\n" 
+"#+END_EXAMPLE"
+)
+
+(define-abbrev org-mode-abbrev-table "iexp" "" '1exp)
+
+</pre>
+#+END_HTML
+
+
+这个 Skeleton 解决的是 =#+BEGIN_EXAMPLE= =#+END_EXAMPLE= 标签的问题。通过上面这个 Skeleton，只要在 org-mode 的 buffer 里面输入 iexp，就会自动扩展成 org-mode 的样例片段，就像下面这样，同时把光标自动定位在两行内容的中间，等待你的进一步输入。
+
+: #+BEGIN_EXAMPLE
+: 
+: #+END_EXAMPLE
+
+*** isrc
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+(define-skeleton 1src 
+  "Input #+begin_src #+end_src in org-mode"
+""
+"#+begin_src lisp \n"
+ _ "\n" 
+"#+end_src"
+)
+
+(define-abbrev org-mode-abbrev-table "isrc" "" '1src)
+
+</pre>
+#+END_HTML
+
+上面这个 skeleton和 iexp 非常类似， 只是扩展出来的是 org-mode 的代码片段，使用方式是输入 isrc， 同样会把光标定位在两行的中间，等待用户输入代码。
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+#+begin_src lisp 
+
+#+end_src
+</pre>
+#+END_HTML
+
+*** iprop
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+(define-skeleton 1prop 
+  "Input :PROPERTIES: :END: in org-mode"
+""
+>":PROPERTIES:\n"
+> _ "\n" 
+>":END:"
+)
+
+(define-abbrev org-mode-abbrev-table "iprop" "" '1prop)
+
+</pre>
+#+END_HTML
+
+=:PROPERTIES:= 属性在 GTD 的时候经常会用到。虽然 org-mode 提供了各种按键组合来输入各种 =:PROPERTIES:= ，但是很多时候，直接输入 =:PROPERTIES:= 内容显然要比记忆那些复杂的按键组合要容易的多。
+
+在这里要注意的是，由于 =:PROPERTIES:= 经常与 org-mode 的 heading 一起使用，所以需要考虑到缩进的问题。在这个 Skeleton 定义里面加入的 =>= 字符，就是为了根据当前使用环境，在扩展的时候进行正确的缩进。使用的时候输入 iprop，可以得到下面的内容
+
+
+:    :PROPERTIES:
+:    
+:    :END:
+
+*** ihtml
+
+: (define-skeleton insert-emacser-code
+:   ""
+:   ""
+:   "#+BEGIN_HTML\n"
+: "<pre lang=\"lisp\" line=\"1\">\n"
+: _"\n"
+: "</pre>\n"
+: "#+END_HTML\n"
+: )
+: 
+: (define-abbrev org-mode-abbrev-table "ihtml"  "" 'insert-emacser-code)
+
+
+最后这个 Skeleton 看起来有点复杂了，因为这个不是 org-mode 的默认格式。这个是给 Emacser.com 写稿的时候引用代码片段所需的外框。在写作的时候只要输入 ihtml，就可以扩展成下面的内容 <<note>> 。
+
+: #+BEGIN_HTML
+: <pre lang="lisp" line="1">
+: 
+: </pre>
+: #+END_HTML
+
+上次发稿的时候由于忘记了这个 Skeleton，所有的代码、样例全都写成了 org-mode 默认的标签，完成之后才想起来，然后又手工删除并补写了 Emacser.com 需要的标签，再然后，相信我不说你们也猜的出来了，惨痛的的教训啊！！！ 以后一定要记得用 Skeleton 啊。
+
+** eLisp
+
+俗话说，“一张白纸好作画”。白纸一张的日子毕竟不会是生活的全部。当纸已经变得不白的时候，当那些代码、样例都已经在那里了的时候，我们总不能当一切的一切都已经“不可挽回”的时候，我们就需要借助 eLisp 的处理能力，让我们在已经选择的道路上面能够走得更好。解决思路，面对现实。承认已经存在的现实，把该补的东西补上去就是了。只要这个活儿是 Emacs 干，不是我们干，那就不是问题。
+
+*** iexp
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+(defun iexp (St Ed)
+  "Enclose example for org-mode"
+  (interactive "r")
+  (let ((beg St) (end Ed))
+    (message "%s %s" beg end)
+    (i-babel-quote beg end "#+BEGIN_EXAMPLE" "#+END_EXAMPLE")))
+</pre>
+#+END_HTML
+
+这个函数对应于上面的 iexp Skeleton。使用的时候，选中要处理的样例片段，然后输入 =M-x iexp= ，即可在选中的样例两端加入相应的内容。
+
+例如下面这样的内容
+
+#+BEGIN_HTML
+ <pre lang="lisp" line="1">
+(require-extensions 'require
+ (list 
+  'tabbar 
+  'switch-window
+  'thing-edit
+  'second-sel
+  'browse-kill-ring+
+))
+</pre>
+#+END_HTML
+
+通过  =M-x iexp= 命令，就会变成这样的内容
+
+
+: #+BEGIN_EXAMPLE
+: (require-extensions 'require
+:  (list 
+:   'tabbar 
+:   'switch-window
+:   'thing-edit
+:   'second-sel
+:   'browse-kill-ring+
+: ))
+: #+END_EXAMPLE
+
+
+*** isrc
+
+同样的道理应用在 isrc 函数上面。 这个函数对应上面的 isrc skeleton。同样也是选中要处理的样例片段，然后输入 =M-x isrc= ，即可在选中的样例两端加入相应的内容。在这个里面有一个小小的设计，就是处理完成之后光标会被定位在 =#+begin_src= 的后面，方便输入编程语言的名称。
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+(defun isrc (St Ed)
+  "Enclose code for org-mode"
+  (interactive "r")
+  (let ((beg St) (end Ed))
+    (message "%s %s" beg end)
+    (i-babel-quote beg end "#+begin_src " "#+end_src")))
+</pre>
+#+END_HTML
+
+*** ihtml
+
+这个 ihtml 函数就是上次给 Emacser.com 写稿的时候用“鲜血”换来的啊。我要是早点儿把这个东西写出来该有多好啊。每次想到这里总会想到胖兔子粥粥说到的 [[http://blog.sina.com.cn/s/blog_4731948b0100irxv.html][和拖拉死磕到底]] 。其实我真正想说的潜台词还是——要是早一点儿能够元旦放假该有多好啊，那样的话我肯定就把这个函数写了么。汗啊。
+
+使用方法同样是选中要用的代码，然后输入 =M-x ihtml= 命令。由于 Emacser.com 的标签行数比较多，这里用了 =concat= 函数做了处理。
+
+: (defun ihtml (St Ed)
+:   "Enclose code for Emacser.cn"
+:   (interactive "r")
+:   (let ((beg St) (end Ed))
+:     (message "%s %s" beg end)
+:     (i-babel-quote beg end 
+: 		   (concat "#+BEGIN_HTML\n " "<pre lang=\"lisp\" line=\"1\">\n")
+: 
+: 		   (concat "</pre>\n" "#+END_HTML\n")
+: 		   )))
+
+*** base function
+
+最后还是依照以前的惯例，在介绍完出镜的美女以后，让我们来认识一下踏实干活、默默奉献的基础函数吧。所有上面的函数都是通过这个基础函数完成补全的工作的。让我们为这个函数鼓掌。
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+(defun i-babel-quote (beg end str1 str2)
+  (goto-char end)
+  (forward-line 1)
+  (insert str2)
+  (newline)
+  (goto-char beg)
+  (forward-line -1)
+  (newline)
+  (insert str1)
+)
+</pre>
+#+END_HTML
+
+*** i=
+
+最后的最后，再饶一个小小的函数。这个函数是处理行内(inline)代码的。说白了就是在所选文字的首尾加上一组等于号。就这么简单个事情，如果处理的数量多的时候也是一个不小的负担。尤其是当文章已经写好，或者是处理拷贝过来的的内容的时候。
+
+使用方法和上面的函数一样，选中所需的内容，然后输入 =M-x i== 就一切就都处理完毕了。
+
+#+BEGIN_HTML
+<pre lang="lisp" line="1">
+(defun i= (St Ed)
+  ""
+  (interactive "r")
+  (let ((beg St) (end Ed))
+    (goto-char end)
+    (insert "=")
+    (goto-char beg)
+    (insert "=")
+    (goto-char (+ end 2)))
+)
+
+</pre>
+#+END_HTML
+** 后记  Export 中遇到问题
+
+这篇文章本来是没有后记的，但是我们在输出的时候遇到一些了问题，并且解决掉了这些问题，因此还是有必要把它加进来和大家分享一下的。
+
+大家可以看到，在这篇文章里描述了很多 orgmode 的标签。由于Emacser.com 的稿件里面需要用 =#+Begine_html= 和 =<pre>= 来把代码和样例括起来，当代码和样例里面本身就含有这样的标签的时候，就会形成嵌套标签的情形。下面就是一个嵌套的例子，这是上文的 Skeleton ihtml [[note]] 样例的源文件。
+
+: #+BEGIN_HTML
+: <pre lang="lisp" line="1">
+: #+BEGIN_HTML
+: <pre lang="lisp" line="1">
+: 
+: </pre>
+: #+END_HTML
+: </pre>
+: #+END_HTML
+
+
+这些嵌套的内容在输出的时候就会出现混乱。目前在 orgmode 文档的 export options 和 export html 部分都还没有发现关于嵌套标签输出的内容。后来我自己感觉的一个可行的解决办法是将内嵌标签的关键字符替换成 html escape character ，这样 orgmode就不会把他识别为标签，同时又能够保证输出结果在浏览器里的正确表现。就像下面这样。
+
+: &#35;+BEGIN_HTML
+: &lt;pre lang="lisp" line="1"&gt;
+: &#35;+BEGIN_HTML
+: &lt;pre lang="lisp" line="1"&gt;
+: 
+: &lt;/pre&gt;
+: &#35;+END_HTML
+: &lt;/pre&gt;
+: &#35;+END_HTML
+
+这种方式的问题主要是需要手工修改的地方多了一些。后来 ahei 提出完全可以把 =#+BEGIN_HTML= 和 =<pre>= 的部分去掉，直接使用 =:= 转义代码/样例本身就行了。
+
+: : #+BEGIN_HTML
+: : <pre lang="lisp" line="1">
+: : 
+: : </pre>
+: : #+END_HTML
+
+当然还是这种最简单，注意 =:= 后面的空格。前提是不要  =#+BEGIN_HTML= 和 =<pre>= 的标签。

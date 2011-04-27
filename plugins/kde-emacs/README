@@ -1,0 +1,11 @@
+kde-emacs-core.el +112
+
+
+(c-add-style "kde-c" '("stroustrup"
+                       (c-basic-offset . 4)
+                       (c-offsets-alist
+                        (case-label . 4)
+                        (access-label . -)
+                        (label . 0)
+                        (statement-cont . c-lineup-math)
+                        )))

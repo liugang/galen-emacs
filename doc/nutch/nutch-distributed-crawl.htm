@@ -1,0 +1,692 @@
+<!-- -*- html -*- -->
+
+<!-- Time-stamp: "2010-03-11 18:50:56 Thursday by ahei" -->
+
+<!-- nutch的分布式抓取 -->
+
+<!-- 搜索引擎, nutch, hadoop, 中级 -->
+
+<img class="alignright" title="Nutch" src="screenshots/nutch-logo.gif"/>
+
+前段时间我写了一篇文章讲<a href="nutch-tutorial.htm" target="_blank">nutch的简单使用</a>，是单台机器抓取，今天我讲一下nutch的分布式抓取。
+
+由于nutch的分布式是采用hadoop，所以nutch的分布式抓取主要涉及到hadoop和nutch本身两方面的配置。<!--more-->
+
+<h4>hadoop的配置</h4>
+hadoop的配置主要涉及到以下几个文件:<ul>
+  <li>hadoop-env.sh
+    hadoop-env.sh里面是一些hadoop脚本文件需要用到的环境变量。<ol>
+      <li>JAVA_HOME
+    hadoop-env.sh中最重要的选项是JAVA_HOME, 如果这个选项没有设置的话，而且你的系统也没有设置这个环境变量的话，运行hadoop脚本的时候会出现下面的错误提示：
+    <pre lang="text">
+Error: JAVA_HOME is not set.
+    </pre>
+      我改了一下hadoop脚本，当你没有设置JAVA_HOME的时候，可以通过"which java"命令来自动设置JAVA_HOME，代码如下：
+      <pre lang="bash" line="1">
+if [[ -z "$JAVA_HOME" ]]; then
+    JAVA_HOME=`cd $(dirname $(readlink -m $(which java)))/../../ && pwd`
+fi
+      </pre>
+      原理很简单，首先用which命令找到java命令的路径，然后用readlink命令得到软链接指向的真正目录，而java命令一般都在$JAVA_HOME/jre/bin/下，所以得到java命令的目录就知道了JAVA_HOME了。这个方法在ubuntu下一般都有效，但是在gentoo下无效，gentoo下java命令是/usr/bin/run-java-tool。</li>
+
+      <li>HADOOP_SSH_OPTS
+        这个选项是传给ssh的。由于hadoop在启动集群内别的机器上的hadoop程序的时候，是通过ssh来操作的，所以你可以通过设置这个选项来控制ssh的选项。ssh登录到别的机器的时候，如果目标机器没有经过你的认证，即它的key不在你的~/.ssh/known_hosts里面，你就会得到如下的提示：
+        <pre lang="text" line="1">
+The authenticity of host 'aheiu (172.0.1.208)' can't be established.
+RSA key fingerprint is fa:e0:57:4e:6a:1d:e3:3e:49:86:8f:13:e5:45:47:f0.
+Are you sure you want to continue connecting (yes/no)?
+        </pre>
+        这时候你必须输入yes才能继续。这样就需要人工的干预了。那么怎样才能做到自动化呢？
+        ssh有个选项StrictHostKeyChecking, 这个选项控制当目标主机没有进行过认证的时候，是否显示上面的信息，所以我们登录别的机器的时候，只需要ssh -O StrictHostKeyChecking=no就可以直接登录了，就不会有上面烦人的提示了, 而且还会讲目标主机key加到~/.ssh/known_hosts里面。
+        <pre lang="bash">
+alias ssh='ssh -o StrictHostKeyChecking=no'
+        </pre>
+        这样以后每次只要输入ssh, 不用输入那么长的命令了。
+        <pre lang="bash">
+export HADOOP_SSH_OPTS="-o StrictHostKeyChecking=no"
+        </pre>
+        这样配置以后，启动hadoop集群的时候，也不需要手工输入那个yes了。
+        </li>
+
+      <li>HADOOP_PID_DIR
+        hadoop脚本启动hadoop程序的时候，把每一个程序的pid写到一个文件里，这个文件所在的目录就是HADOOP_PID_DIR的值。HADOOP_PID_DIR的默认值是/tmp, 这样如果想在同一个机器集群上启动多个hadoop集群，就会覆盖pid文件，所以要设置成其他目录：
+        <pre lang="bash">
+export HADOOP_PID_DIR=${HADOOP_HOME}/pids
+        </pre>
+        </li>
+    </ol>
+
+    hadoop-env.sh配置如下：
+    <pre lang="bash" line="1">
+# Set Hadoop-specific environment variables here.
+
+# The only required environment variable is JAVA_HOME.  All others are
+# optional.  When running a distributed configuration it is best to
+# set JAVA_HOME in this file, so that it is correctly defined on
+# remote nodes.
+
+# The java implementation to use.  Required.
+export JAVA_HOME=/usr/lib/jvm/java-6-sun
+
+# The maximum amount of heap to use, in MB. Default is 1000.
+# export HADOOP_HEAPSIZE=2000
+
+# Extra Java runtime options.  Empty by default.
+# export HADOOP_OPTS=-server
+
+# Extra ssh options.  Default: '-o ConnectTimeout=1 -o SendEnv=HADOOP_CONF_DIR'.
+export HADOOP_SSH_OPTS="-o StrictHostKeyChecking=no"
+
+# Where log files are stored.  $HADOOP_HOME/logs by default.
+# export HADOOP_LOG_DIR=${HADOOP_HOME}/logs
+
+# File naming remote slave hosts.  $HADOOP_HOME/conf/slaves by default.
+# export HADOOP_SLAVES=${HADOOP_HOME}/conf/slaves
+
+# host:path where hadoop code should be rsync'd from.  Unset by default.
+# export HADOOP_MASTER=master:/home/$USER/src/hadoop
+
+# The directory where pid files are stored. /tmp by default.
+export HADOOP_PID_DIR=${HADOOP_HOME}/pids
+
+# A string representing this instance of hadoop. $USER by default.
+# export HADOOP_IDENT_STRING=$USER
+    </pre>
+  </li>
+
+  <li>hadoop-site.xml
+    hadoop-site.xml是对hadoop的java程序进行配置。和nutch一样，hadoop-default.xml是默认的配置，不要直接修改它，把你的配置放到hadoop-site.xml中来。
+    必须的选项：<ol>
+      <li>hadoop.tmp.dir
+        hadoop的dfs数据和map reduce程序运行的时候临时数据存放在此
+      </li>
+
+      <li>fs.default.name
+        namenode的ip和端口
+      </li>
+
+      <li>mapred.job.tracker
+        jobtracker的ip和端口
+      </li></ol>可选的选项：<ol>
+      <li>mapred.job.tracker.http.address
+        jobtracker的web ip和端口配置
+      </li>
+
+      <li>dfs.http.address
+        hdfs的web ip和端口配置
+      </li>
+      在一个机器集群上配置多个hadoop集群的时候，需要修改上面这两个选项和上面的必须的选项中关于namenode和jobtracker的两个选项。<li>mapred.map.tasks
+        每个任务的map task数目
+      </li>
+
+      <li>mapred.reduce.tasks
+        每个任务的reduce task书目
+      </li>
+
+      <li>mapred.tasktracker.map.tasks.maximum
+        每个tasktracker能运行的map task的最大的数目
+      </li>
+
+      <li>mapred.tasktracker.reduce.tasks.maximum
+        每个tasktracker能运行的reduce task的最大的数目
+      </li>
+
+      <li>mapred.child.java.opts
+        传给每个task程序的java选项，默认的是设置最大内存为200M
+      </li></ol>
+    hadoop-site.xml配置如下：
+    <pre lang="xml" line="1" file="hadoop-site.xml" colla="-">
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <property>
+    <name>master</name>
+    <value></value>
+  </property>
+
+  <property>
+	<name>hadoop.tmp.dir</name>
+    <value>/opt/crawler/data</value>
+    <description>A base for other temporary directories.
+    </description>
+  </property>
+
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://${master}:9000/</value>
+    <description>The name of the default file system. Either the literal string
+      "local" or a host:port for DFS.
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>hdfs://${master}:9001/</value>
+    <description>The host and port that the MapReduce job tracker runs at. If
+      "local", then jobs are run in-process as a single map and reduce task.
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.job.tracker.http.address</name>
+    <value>0.0.0.0:50030</value>
+    <description>
+      The job tracker http server address and port the server will listen on.
+      If the port is 0 then the server will start on a free port.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.http.address</name>
+    <value>0.0.0.0:50070</value>
+    <description>
+      The address and the base port where the dfs namenode web ui will listen on.
+      If the port is 0 then the server will start on a free port.
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.map.tasks</name>
+    <value>31</value>
+    <description>The default number of map tasks per job.  Typically set
+      to a prime several times greater than number of available hosts.
+      Ignored when mapred.job.tracker is "local".  
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.reduce.tasks</name>
+    <value>5</value>
+    <description>The default number of reduce tasks per job.  Typically set
+      to a prime close to the number of available hosts.  Ignored when
+      mapred.job.tracker is "local".
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.tasktracker.map.tasks.maximum</name>
+    <value>10</value>
+    <description>The maximum number of map tasks that will be run
+      simultaneously by a task tracker.
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.tasktracker.reduce.tasks.maximum</name>
+    <value>10</value>
+    <description>The maximum number of reduce tasks that will be run
+      simultaneously by a task tracker.
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.child.java.opts</name>
+    <value>-Xmx1024m</value>
+    <description>Java opts for the task tracker child processes.  
+      The following symbol, if present, will be interpolated: @taskid@ is replaced 
+      by current TaskID. Any other occurrences of '@' will go unchanged.
+      For example, to enable verbose gc logging to a file named for the taskid in
+      /tmp and to set the heap maximum to be a gigabyte, pass a 'value' of:
+      -Xmx1024m -verbose:gc -Xloggc:/tmp/@taskid@.gc
+      
+      The configuration variable mapred.child.ulimit can be used to control the
+      maximum virtual memory of the child processes. 
+    </description>
+  </property>
+
+  <property>
+    <name>mapred.task.tracker.http.address</name>
+    <value>0.0.0.0:0</value>
+    <description>
+      The task tracker http server address and port.
+      If the port is 0 then the server will start on a free port.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.secondary.http.address</name>
+    <value>0.0.0.0:0</value>
+    <description>
+      The secondary namenode http server address and port.
+      If the port is 0 then the server will start on a free port.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.datanode.address</name>
+    <value>0.0.0.0:0</value>
+    <description>
+      The address where the datanode server will listen to.
+      If the port is 0 then the server will start on a free port.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value>0.0.0.0:0</value>
+    <description>
+      The datanode http server address and port.
+      If the port is 0 then the server will start on a free port.
+    </description>
+  </property>
+
+  <property>
+    <name>dfs.datanode.ipc.address</name>
+    <value>0.0.0.0:0</value>
+    <description>
+      The datanode ipc server address and port.
+      If the port is 0 then the server will start on a free port.
+    </description>
+  </property>
+</configuration>
+</pre>
+  </li>
+
+  <li>master secondarymasters
+    hadoop中默认的没有master这个文件，只有个masters文件，启动hadoop集群的时候只能在master上启动，不能在slave上启动，masters文件里面存放的是secondarynamenode的ip。我改了一下hadoop的脚本，master文件里面存放master的ip，secondarymasters里面存放secondarynamenode的ip。
+  </li>
+</ul>
+
+<h4>nutch的配置</h4>
+<ul>
+  <li>urlfilter
+    由于plugin.includes中只包含了urlfilter-regex，而根据<a href="nutch-load-conf.htm">《nutch配置文件的加载》</a>一文，crawl-tool.xml文件的优先级最高，所以urlfilter-regex插件所用到的配置文件应该是crawl-tool.xml中配置的，默认是crawl-urlfilter.txt，改其配置如下：
+    <pre lang="text" line="1">
+# skip file:, ftp:, & mailto: urls
+-^(file|ftp|mailto):
+
+# skip image and other suffixes we can't yet parse
+-\.(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|sit|eps|wmf|zip|ppt|mpg|xls|gz|rpm|tgz|mov|MOV|exe|jpeg|JPEG|bmp|BMP)$
+
++.
+    </pre>
+  </li>
+
+  <li>nutch-site.xml
+    必须的配置是http.agent.name和http.robots.agents，和<a href="nutch-load-conf.htm">《nutch配置文件的加载》</a>文中一样。
+  </li>
+</ul>
+
+<h4>一些方便部署的脚本</h4>
+我修改了一些hadoop的脚本，使得部署和监控hadoop更方便。<ul>
+  <li>restart-all.sh
+    重启hadoop集群
+  </li>
+
+  <li>all.sh
+    这个脚本使你可以同时在集群的所有机器上执行同一个命令，比如你想查看集群上的日志里有没有错误，这样就可以了：
+    <pre lang="bash">
+      ./all.sh grep ERROR path-of-logs/hadoop.log
+    </pre>
+    <pre lang="bash" line="1" file="all.sh" colla="-">
+#!/bin/sh
+
+# Time-stamp: <2010-01-04 16:21:16 Monday by ahei>
+
+readonly PROGRAM_NAME="rm-all.sh"
+
+usage()
+{
+    echo "usage: ${PROGRAM_NAME} -h | [-s] <COMMAND> ..."
+    echo
+    echo "Options"
+    echo "-s\tsort output"
+    
+    exit 1
+}
+
+if [ "x$1" = "x-h" -o "x$1" = "x--help" -o $# = 0 ]; then
+    usage
+fi
+
+bin=`dirname "$0"`
+bin=`cd "$bin"; pwd`
+
+if [ "x$1" = "x-s" ]; then
+    shift
+    output=`"$bin/slaves.sh" --hosts master cd "${bin}" \&\& "$@"`
+    output="$output\n"`$bin/slaves.sh" --hosts secondarymasters cd "${bin}" \&\& "$@"`
+    output="${output}\n"`"$bin/slaves.sh" cd "${bin}" \&\& "$@"`
+    echo "${output}" | sort
+else
+    "$bin/slaves.sh" --hosts master cd "${bin}" \&\& "$@"
+    "$bin/slaves.sh" --hosts secondarymasters cd "${bin}" \&\& "$@"
+    "$bin/slaves.sh" cd "${bin}" \&\& "$@"
+fi
+    </pre>
+  </li>
+
+  <li>clean-logs.sh
+    删除所有机器上的log
+    <pre lang="bash" line="1" file="clean-logs.sh" colla="-">
+#!/bin/sh
+
+# Time-stamp: <10/24/2008 11:09:33 星期五 by ahei>
+
+# Clean logs on all hadoop daemons.
+
+bin=`dirname "$0"`
+bin=`cd "$bin"; pwd`
+
+. $bin/hadoop-config.sh
+
+if [ -f "${HADOOP_CONF_DIR}/hadoop-env.sh" ]; then
+  . "${HADOOP_CONF_DIR}/hadoop-env.sh"
+fi
+
+HADOOP_LOG_DIR=${HADOOP_LOG_DIR:-"${HADOOP_HOME}/logs"}
+
+"${bin}/rm-all.sh" "${HADOOP_LOG_DIR}"
+    </pre>
+  </li>
+
+  <li>df-all.sh du-all.sh jps-all.sh ll-all.sh mv-all.sh rm-all.sh
+    在所有的机器上执行对应的前缀命令，比如df-all.sh，即在所有机器上执行df命令，这些脚本调用的都是all.sh。
+  </li>
+
+  <li>update-conf.sh
+    配置hadoop的时候，有两个地方需要配置master的ip，一个是master文件夹，另一个是hadoop-site.xml中配置namenode和jobtracker的ip，那么每次配置hadoop的时候都需要配置这两个项，能不能只配置一个呢？还有，为了方便管理，我部署nutch的时候，建立的文件结构是这样的，/opt/crawler，/opt/crawler/data，/opt/crawler/program，data这个文件夹是hadoop.tmp.dir，program则是nutch的程序，所以hadoop.tmp.dir实际上即使$HADOOP_HOME/../data。为了方便部署，我写了这个update-conf.sh脚本，自动把master文件中的内容写到haoop-site.xml中去，而且自动更新hadoop-site.xml中的hadoop.tmp.dir的值，这样你配置的时候，只需要配置master文件就可以了。
+    <pre lang="bash" line="1" file="update-conf.sh" colla="-">
+#!/usr/bin/env bash
+
+# Time-stamp: <2010-01-22 15:31:53 Friday by ahei>
+
+# @version 1.0
+# @author ahei
+
+bin=`dirname "$0"`
+bin=`cd "$bin" && pwd`
+
+resolveLink()
+{
+    this="$1"
+
+    while [[ -L "$this" && -r "$this" ]]; do
+        link=$(readlink "$this")
+        link=$(normalizePath "$link")
+
+        if [[ "${link:0:1}" = "/" ]]; then
+            this="$link"
+        else
+            dir=$(dirname "$this")
+            if [[ "$dir" != "." ]]; then
+                this="$dir/$link"
+            else
+                this="$link"
+            fi
+        fi
+    done
+
+    echo "$this"
+}
+
+normalizePath()
+{
+    local path="$1"
+
+    dir=$(dirname "$path")
+    if [[ "$dir" != "." ]]; then
+        path=$dir/$(basename "$path")
+    else
+        path=$(basename "$path")
+    fi
+
+    echo "$path"
+}
+
+confFile=hadoop-site.xml
+
+# update master setting
+
+cd "$bin"/../conf &&
+no=`grep -xE "[[:space:]]*<name>master</name>[[:space:]]*" "$confFile" -n | tail -1 | awk -F: '{print $1}'`
+let no++
+master=`cat master`
+sed -r "$no s#<value>.*</value>#<value>$master</value>#g" -i "$confFile"
+
+# update hadoop.tmp.dir
+
+no=`grep -xE "[[:space:]]*<name>hadoop.tmp.dir</name>[[:space:]]*" "$confFile" -n | tail -1 | awk -F: '{print $1}'`
+let no++
+
+dataDir=$(resolveLink `cd "$bin"/../.. && pwd`)/data
+sed -r "$no s#<value>.*</value>#<value>$dataDir</value>#g" -i "$confFile"
+    </pre>
+  </li>
+
+  <li><span style="color: #0000ff;">kill-all.sh</span>
+    由于hadoop的stop-all.sh脚本是根据pid文件来kill hadoop的daemon程序的，所以如果你不小心删除了pid文件，stop-all.sh就不能kill掉那些daemon程序了。kill-all.sh弥补了stop-all.sh的缺陷，它是通过jps命令来得到所有的java进程pid，然后根据daemon程序的名字来得到所有的daemon程序的pid，再根据/proc文件夹得到这些进程的当前目录，如果这个当前目录与HADOOP_HOME一样，就kill掉这个进程。
+    <span style="color: #0000ff;">ping-all.sh</span>
+    这个脚本不是在所有的机器上运行ping命令，而是ping一下所有机器上的daemon程序，还是否还活着，管理hadoop集群的时候很方便。
+    由于kill-all.sh和ping-all.sh最终都是通过hadoop-daemon.sh来实现的, 我这里只列出hadoop-daemon.sh的代码:
+    <pre lang="bash" line="1" file="hadoop-daemon.sh" colla="-">
+#!/bin/sh
+
+# Time-stamp: <2010-02-03 15:34:22 Wednesday by ahei>
+
+# Runs a Hadoop command as a daemon.
+#
+# Environment Variables
+#
+#   HADOOP_CONF_DIR  Alternate conf dir. Default is ${HADOOP_HOME}/conf.
+#   HADOOP_LOG_DIR   Where log files are stored.  PWD by default.
+#   HADOOP_MASTER    host:path where hadoop code should be rsync'd from
+#   HADOOP_PID_DIR   The pid files are stored. /tmp by default.
+#   HADOOP_IDENT_STRING   A string representing this instance of hadoop. $USER by default
+#   HADOOP_NICENESS The scheduling priority for daemons. Defaults to 0.
+
+usage="Usage: hadoop-daemon.sh [--config <conf-dir>] [--hosts hostlistfile] (start|stop|ping) <hadoop-command> <args...>"
+
+# if no args specified, show usage
+if [ $# -le 1 ]; then
+    echo $usage
+    exit 1
+fi
+
+bin=`dirname "$0"`
+bin=`cd "$bin"; pwd`
+
+. "$bin"/hadoop-config.sh
+
+# get arguments
+startStop=$1
+shift
+command=$1
+shift
+
+hadoop_rotate_log ()
+{
+    log=$1;
+    num=5;
+    if [ -n "$2" ]; then
+	    num=$2
+    fi
+    if [ -f "$log" ]; then # rotate logs
+	    while [ $num -gt 1 ]; do
+	        prev=`expr $num - 1`
+	        [ -f "$log.$prev" ] && mv "$log.$prev" "$log.$num"
+	        num=$prev
+	    done
+	    mv "$log" "$log.$num";
+    fi
+}
+
+if [ -f "${HADOOP_CONF_DIR}/hadoop-env.sh" ]; then
+    . "${HADOOP_CONF_DIR}/hadoop-env.sh"
+fi
+
+# get log directory
+if [ "$HADOOP_LOG_DIR" = "" ]; then
+    export HADOOP_LOG_DIR="$HADOOP_HOME/logs"
+fi
+mkdir -p "$HADOOP_LOG_DIR"
+
+if [ "$HADOOP_PID_DIR" = "" ]; then
+    HADOOP_PID_DIR=/tmp
+fi
+
+if [ "$HADOOP_IDENT_STRING" = "" ]; then
+    export HADOOP_IDENT_STRING="$USER"
+fi
+
+# some variables
+export HADOOP_LOGFILE=hadoop-$HADOOP_IDENT_STRING-$command-$HOSTNAME.log
+export HADOOP_ROOT_LOGGER="INFO,DRFA"
+log=$HADOOP_LOG_DIR/hadoop-$HADOOP_IDENT_STRING-$command-$HOSTNAME.out
+pid=$HADOOP_PID_DIR/hadoop-$HADOOP_IDENT_STRING-$command.pid
+
+# Set default scheduling priority
+if [ "$HADOOP_NICENESS" = "" ]; then
+    export HADOOP_NICENESS=0
+fi
+
+case $startStop in
+    start)
+        mkdir -p "$HADOOP_PID_DIR"
+
+        if [ -f $pid ]; then
+            if kill -0 `cat $pid` > /dev/null 2>&1; then
+                echo $command running as process `cat $pid`.  Stop it first.
+                exit 1
+            fi
+        fi
+
+        hadoop_rotate_log $log
+        echo starting $command, logging to $log
+        nohup nice -n $HADOOP_NICENESS "$HADOOP_HOME"/bin/hadoop --config $HADOOP_CONF_DIR $command "$@" > "$log" 2>&1 < /dev/null &
+        echo $! > $pid
+        sleep 1; head "$log"
+        ;;
+    
+    stop)
+        if [ -f $pid ]; then
+            if kill -0 `cat $pid` > /dev/null 2>&1; then
+                echo stopping $command
+                kill -9 `cat $pid`
+            else
+                echo no $command to stop
+            fi
+        else
+            echo no $command to stop
+        fi
+        ;;
+
+    kill)
+        pids=$(jps | tr '[A-Z]' '[a-z]' | awk "{if (NF > 1 && \$2 == \"$command\"){print \$1}}")
+        exist=
+        if [[ -n "$pids" ]]; then
+            for p in $pids; do
+                if [[ "$(readlink -m /proc/$p/cwd)" = "$(readlink -m "$HADOOP_HOME")" ]]; then
+                    echo "killing $command of pid $p ..."
+                    kill -9 "$p"
+                    exist=1
+                fi
+            done
+        fi
+        if [[ "$exist" != 1 ]]; then
+            echo "Can not found any $command to kill"
+        fi
+        ;;
+    
+    ping)
+        if [ -f $pid ] && kill -0 `cat $pid` > /dev/null 2>&1; then
+            echo "$command is alive"
+        else
+            pids=$(jps | tr '[A-Z]' '[a-z]' | awk "{if (NF > 1 && \$2 == \"$command\"){print \$1}}")
+            maybePids=
+            if [[ -n "$pids" ]]; then
+                for p in $pids; do
+                    if [[ "$(readlink -m /proc/$p/cwd)" = "$(readlink -m "$HADOOP_HOME")" ]]; then
+                        maybePids="$maybePids $p"
+                    fi
+                done
+            fi
+            if [[ -z "$maybePids" ]]; then
+                echo "$command is dead"
+            else
+                if [ -f "$pid" ]; then
+                    output="$command pid can not found in its pid file $pid"
+                else
+                    output="${command}'s pid file $pid does not exist"
+                fi
+                echo "$output, but some pids$maybePids of $command exist"
+            fi
+        fi
+        ;;
+        
+    *)
+        echo $usage
+        exit 1
+        ;;
+esac
+    </pre>
+  </li>
+
+  <li><span style="color: #0000ff;">rsync-slaves.sh</span>
+    假如你修改了一项配置或者改了一下程序，那你怎么把所有机器上的程序都更新一下？hadoop已经替你想好了，它默认的是在hadoop-daemon.sh里调用rsync命令，来把某台机器与master同步，我单独写了这个脚本，来把所有的slave和master同步。在start-all.sh脚本里会自动调用rsync-slaves.sh，所以基本上不需要你手动执行它。该脚本会忽略名为ignores的文件或文件夹，你可以把你不想同步的文件都放到ignores文件夹里面。
+    <pre lang="bash" line="1" file="rsync-slaves.sh" colla="-">
+#!/bin/sh
+
+# Time-stamp: <2010-01-14 17:07:05 Thursday by ahei>
+
+readonly PROGRAM_NAME="rsync-slaves.sh"
+
+usage()
+{
+    echo "usage: ${PROGRAM_NAME} [--hosts hostlistfile] [-h]"
+    exit 1
+}
+
+if [ "x$1" = "x-h" ]; then
+    usage
+fi
+
+bin=`dirname "$0"`
+bin=`cd "$bin"; pwd`
+
+. $bin/hadoop-config.sh
+
+if [ -f "${HADOOP_CONF_DIR}/hadoop-env.sh" ]; then
+  . "${HADOOP_CONF_DIR}/hadoop-env.sh"
+fi
+
+command="mkdir -p \"$HADOOP_HOME\" && rsync -azvh --delete --progress --exclude=logs --exclude=ignores --exclude=pids \"${HADOOP_MASTER}\" \"${HADOOP_HOME}\" $@"
+"$bin"/slaves.sh $command
+"$bin"/slaves.sh --hosts secondarymasters $command
+    </pre>
+  </li>
+</ul>
+
+<h4>部署</h4>
+讲完配置，下面就开始部署了。<ol><li>配置机器连通性
+    由于hadoops是通过ssh启动没个节点上的daemon程序，所以先配置好机器之间的<a href="ssh-copy-id.htm" target="_blank">免认证登录</a>，免得每次启动hadoop集群的时候都需要输入密码。
+  </li>
+
+  <li>启动hadoop集群
+    <pre lang="bash" line="1">
+mkdir -p /opt/crawler
+cp nutch /opt/crawler/program -r
+cd /opt/crawler/program/bin
+./hadoop namenode -format
+./start-all.sh
+    </pre>
+  </li>
+
+  <li>开始抓取
+    抓取和文<a href="nutch-load-conf.htm">《nutch配置文件的加载》</a>中一样，有一个不通的地方是url文件夹必须是在hdfs里面存放的，你可以用这个命令把本地url文件夹拷贝到hdfs中：
+    <pre lang="bash">
+./hadoop fs -copyFromLocal ignores/urls urls
+    </pre>
+  </li>
+
+  <li>查看hadoop job task状态
+    http://master:50030查看jobtracker状态，http://master:50070可以浏览hdfs中内容
+  </li>
+</ol>
+
+<h4>部署多个hadoop集群</h4>
+如果你的机器比较紧张，想在一个机器集群上部署多个hadoop集群，该怎么弄呢？很简单，首先把nutch文件夹拷贝到另一个不同的地方，然后你只需要修改hadoop-site.xml中以下几项为不同的值就可以了：
+fs.default.name mapred.job.tracker mapred.job.tracker.http.address dfs.http.address

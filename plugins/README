@@ -1,0 +1,12 @@
+cedet:
+
+http://cedet.sourceforge.net/bzr-repo.shtml
+
+bzr checkout bzr://cedet.bzr.sourceforge.net/bzrroot/cedet/code/trunk cedet
+bzr update
+
+
+
+ecb:
+
+cvs -z3 -d:pserver:anonymous@ecb.cvs.sourceforge.net:/cvsroot/ecb co -P ecb

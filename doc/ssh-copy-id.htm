@@ -1,0 +1,136 @@
+<!-- -*- html -*- -->
+
+<!-- Time-stamp: "2010-03-11 23:18:10 Thursday by ahei" -->
+
+<!-- ssh的免认证登录 -->
+
+<!-- linux, 中级 -->
+
+<img class="alignright" title="OpenSSH" src="screenshots/openssh.gif" width="200" height="90"/>
+
+linux下用ssh登录别的机器的时候，需要通过交互方式手工输入密码，ssh不支持直接加密码的选项，它觉得这样不安全。 但是有时候要完成一些自动的任务，比如登录到别的机器上，并在那台机器上启动一些程序，这时候该怎么办呢？<!--more-->
+
+我下面提供几种方法：
+<ol>
+  <li><span style="color: #0000ff;">通过expect</span>
+<pre lang="bash" line="1" file="ssh.exp">
+#!/usr/bin/expect
+
+spawn ssh -o StrictHostKeyChecking=no -l username hostname
+expect "*password:"
+send "password\r"
+interact
+</pre>
+把上面的代码中的username和hostname替换为你的用户名和ip，然后保存为ssh.exp，再执行下面的代码：
+<pre lang="bash" line="1">
+chown +x ssh.exp
+./ssh.exp
+</pre>
+就可以自动登录到目标机器上并执行一下ls命令。
+这个方法有个缺点，就是密码以明文的方式保存在文件里，<span style="color: #0000ff;">不安全</span>。
+  </li>
+  <li><span style="color: #0000ff;">sshpass</span>
+    sshpass是专门为ssh的免认证登录设计的, 它可以通过标准输入读入密码, 也可以通过把密码放在它的"-p"选项后面, 还可以用"-f"选项来制定密码文件, 还可以用"-e"选项从环境变量"SSHPASS"来读入密码, ssh的命令跟在sshpass的选项后面, 例如:
+    <pre lang="bash">
+sshpass -p password ssh host -l username
+    </pre>
+    rsync是一个同步的命令, 它是通过ssh来同步的, 如果你想执行rsync的时候也不输入密码, 可以通过指定rsync的"--rsh"选项来实现, 比如:
+    <pre lang="bash">
+rsync --rsh='sshpass -p password ssh -l username' host.example.com:path
+    </pre>
+    如果想要scp也不输入密码的话，建立下面的文件：
+    <pre lang="bash" line="1" file="ssh.sh">
+#!/usr/bin/env bash
+
+sshpass -p password ssh "$@"
+    </pre>
+    然后这样使用scp：
+    <pre lang="bash">
+scp -S path-of-ssh.sh/ssh.sh file user@host:path
+    </pre>
+    该方法使用起来简单, 缺点也是密码以明文方式保存. 
+  </li>
+  <li><span style="color: #0000ff;">通过密钥文件来实现免认证登录</span>
+    <pre lang="bash" line="1">
+# 1. 生成密钥
+ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
+
+# 2. 把本机的公钥拷到目标机器上
+scp ~/.ssh/id_rsa.pub username@remote-hostname:~/temp
+      </pre>
+    经过上面的操作，再登录到目标机器上执行：
+    <pre lang="bash" line="1">
+mkdir -p ~/.ssh
+# 改变权限，必须
+chmod 700 .ssh
+cat temp >> ~/.ssh/authorized_keys
+# 改变权限，必须
+chmod 600 ~/.ssh/authorized_keys
+rm -rf temp
+    </pre>
+    注意：上面代码中的chmod修改权限的语句必须执行，有的ssh设置使得.ssh目录和authorized_keys的权限必须只能自己可读可写，如果权限没设对的话，照样不能免认证登录，这是为了安全考虑。
+    经过上面的操作，你现在就可以不需要输入密码就可以登录到目标机器上了。
+  </li>
+
+  <li><span style="color: #0000ff;">ssh-copy-id</span>
+    上面那个方法，虽然执行的命令不多，但是你想想，如果我们要让一台机器对100台机器都实现免认证登录，岂不是还是很麻烦。那我们把上面的命令写成一个脚本岂不甚好？好注意，不过不用你写了，ssh-copy-id这个命令已经帮你写了，你可以去看看/usr/bin/ssh-copy-id这个文件，它实际上就是一个shell脚本，帮你把你的公钥拷到目标主机的认证文件里，并修改权限，不过它不帮你生成公钥，还得你自己生成。使用方法：
+    <pre lang="bash">
+ssh-copy-id [username]@hostname
+    </pre>
+    很简单吧！</li></ol>
+
+上面的方法3由于不需要把密码明文直接写到文件里面，所以比较安全，方法4和方法3本质上是一样的。
+
+现在我们来考虑另外一个问题。
+
+假如你通过方法2设置了免认证登录，这样, 只要别人拿到了你的私钥, 就可以登录所有已经认证你的机器了. 当然你也可以为你的私钥设置一个密码, 这是通过ssh-keygen的"-P"的来设置的. 但是现在又有一个问题, 那就是你每次登录到已经认证过你的机器的时候, 你都要输入一次你的私钥密码. keychain是解决这个问题的一个很好的工具, 它是ssh-agent的一个前端, 它会把已经认证过的密钥加入ssh-agent的高速缓存, 这样, 只有你第一次使用你的私钥登录别的机器的时候, 需要输入一下密码, 以后再次使用你的私钥的时候, 就不用输入密码了, 既保证了安全性, 又保证了便捷性.
+
+讲完了上面说的免认证登录方法，我们现在可以很简单的让一个集群之间的每一台机器之间都互相免认证，而且完全自动化。
+方法就是：先在集群中的某一台机器上生成好密钥，并且把这台机器自己的公钥添加到它自己的认证文件里面，这样就实现了这台机器免认证登录自己。然后利用expect向每一台机器拷贝刚才那台机器的公私钥和认证文件，这样这个集群中所有机器的公私钥和认证文件都一样了，而刚才那台机器已经可以免认证登录自己，它们之间也当然可以免认证登录了（:)，是不是有点绕？）。这个方法会让每台机器的公私钥都一样，如果集群机器中已经配置了一些其他免认证登录的信息，不能破坏已有的公私钥，这个方法就不能凑效了，只能每两台机器之间互相调用ssh-copy-id命令。
+上面的方法具体实现如下：
+在集群中某一台机器上执行：
+<pre lang="bash" line="1">
+ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
+# 改变权限，必须
+chmod 700 ~/.ssh
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+# 改变权限，必须
+chmod 600 ~/.ssh/authorized_keys
+</pre>
+然后拷贝该机器的公私钥和认证文件到其他的机器上：
+<pre lang="tcl" line="1" file="scp-auth.exp">
+#!/usr/bin/expect
+
+proc scp {user password host} {
+    global env
+
+    set home $env(HOME)
+
+    spawn ssh -o StrictHostKeyChecking=no $user@$host mkdir -p ~/.ssh
+    expect "*password:" {send "$password\r"}
+
+    spawn scp -r -o StrictHostKeyChecking=no $home/.ssh/id_rsa $user@$host:~/.ssh
+    expect "*password:" {send "$password\r"}
+
+    spawn scp -r -o StrictHostKeyChecking=no $home/.ssh/authorized_keys $user@$host:~/.ssh
+    expect "*password:" {send "$password\r"}
+
+    wait
+}
+
+set user [lindex $argv 0]
+set password [lindex $argv 1]
+set host [lindex $argv 2]
+
+scp $user $password $host
+</pre>
+把上面的scp-auth.exp文件保存后,执行下面的命令:
+<pre lang="bash" line="1">
+chmod +x scp-auth.exp
+cat hostlist | xargs -l ./scp-auth.exp
+</pre>
+其中hostlist文件为你的所有要拷贝认证文件的机器列表,每行一条记录, 每条记录的格式为:
+&lt;username&gt; &lt;password&gt; &lt;ip&gt;
+现在你可以在这个机器集群上自由的穿梭了, 不用输入任何密码!
+
+expect很方便吧, 它最大的用处就是用来为那些需要交互的程序模拟用户的输入, 比如passwd, ssh, fsck, ftp等.

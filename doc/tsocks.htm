@@ -1,0 +1,110 @@
+<!-- -*- html -*- -->
+
+<!-- Time-stamp: "2010-03-12 19:16:34 Friday by ahei" -->
+
+<!-- 用tsocks代替sockscap来转发网络请求 -->
+
+<img class="alignright" title="tsocks" src="screenshots/tsocks-logo.jpg"/>
+
+你有没有遇到过这种情况: 某一台机器A的网速特别快, 另外一台机器B和A机器在同一个局域网内, 但是B机器的带宽有限, 由于A机器和B机器由于是在局域网内, 传输速度很快, 所以如果能把B机器的网络请求先发到A, 再由A转发出去, 这样B机器的网速可以一样很快了. 那么怎样来转发请求呢? 很显然, 用代理软件就可以做到. 但是, 我在这里给大家提供一个更简便的架设socks代理的方法, 用ssh服务.<!--more-->
+
+ssh的功能巨强大, 大家可以通过它的man详细了解它的功能, 它的man非常详细. 利用ssh架设代理服务主要是利用它的"-D"选项, 这个选项后面跟一个ip地址和端口, 格式为ip:port, ip地址为你本机待绑定的ip, 是可选的, 加了这个选项后, 就表示在本机与目标机器之间建立一条ssh通道, 而且在本机监听一个你指定的端口.
+我写了一个简单的小函数来开通ssh的代理:
+<pre lang="bash" line="1">
+genproxy ()
+{
+    ip="$1";
+    user="$2";
+    ssh -o StrictHostKeyChecking=no "$ip" -l "$user" -D 8888 -N -f
+}
+</pre>
+这个函数的第一个参数是ip, 第二个参数是用户名, "-o StrictHostKeyChecking=no"表示目标主机的key未知或者改变过时, 不提示. 如果不加这个选项, 你可能会得到类似以下的提示:
+<pre lang="text" line="1">
+The authenticity of host '172.0.1.251 (172.0.1.251)' can't be established.
+RSA key fingerprint is 51:18:fe:5f:de:a7:55:ef:7c:d4:6e:ba:bc:9e:a2:7c.
+Are you sure you want to continue connecting (yes/no)?
+</pre>
+"-N"表示ssh到目标机器后不执行任何命令, 一般不加这个选项的话, 会连接上目标机器后执行你指定的命令, 如果你没有指定任何命令的话, 就直接执行/bin/sh, 所以这个"-N"通常会用在这种只需要监听端口的场合.
+"-f"表示在执行任何命令之前转入到后台进行处理. 
+上述命令如果执行成功的话, 用netstat能看到本机已经建立一个8888端口, 这时候, 只要有网络请求转发到8888这个端口, ssh会把这个请求通过刚才已经建立好的ssh通道发到目标机器上, 从而达到代理的作用. 那么怎么来把请求发到8888这个端口上呢? 有些软件, 比如qq, 有设置socks代理的功能, 但是有好多软件都没有设置socks代理的功能, 那么对于这些软件该怎么办呢? Windows下sockscap这样的软件, 你可以把一些软件的快捷方式加入到sockscap里面去, 然后要想使用代理的话, 就直接在sockscap里面来启动软件. 很方便. 那么linux下是否也有这类软件呢? 当然有, 而且更方便.
+
+tsocks就是一款类似sockscap的网络请求转发的软件.
+使用很简单, 安装完tsocks后, 打开它的配置文件/etc/tsocks.conf, 翻到文件末尾, 里面有一个server和server_port的选项, 这个就是socks server的ip和端口, 分别填上即可. 要注意的地方就是, 对于上面那个例子, 在B机器上配置tsocks的时候, server应该写127.0.0.1, 而不是A机器的ip, 因为8888端口是在B机器上开启的. 我今天配置的时候, 就犯了这个错误, tsocks提示"socks server is not on a local subnet local", 很诡异, 弄了半天才明白. 切记切记. 
+配置好后, 直接tsocks后面跟命令就可以了, 比如
+<pre lang="bash">
+tsocks wget http://www.g.cn
+</pre>
+就可以使用代理来wget了. 但是这样的话, 就必须要在每个命令前都要加tsocks. 还有一个更简单的方法:
+<pre lang="bash">
+. tsocks -on
+</pre>
+注意了, 上面这个命令前面有一个点号, 必须要的, 我今天在配置的时候, 也是没加, 弄了半天都不行, 后来仔细看了tsocks的man才知道了. 那么为什么要加点号呢?
+shell里面,
+<pre lang="bash">
+./test.sh
+</pre>
+shell会开启一个子shell进程来执行test.sh, test.sh里面所有影响环境变量的语句对它的父shell进程都没有影响, 而
+<pre lang="bash">
+. ./test.sh
+</pre>
+不是单独开启一个shell进程, 而是在当前shell下执行test.sh, 这样test.sh里面对环境变量影响的语句在当前shell就起作用了.
+知道上面加与不加点号的区别后, 我们再来看看tsocks的源码:
+<pre lang="bash" line="1">
+case "$1" in
+	-on)
+		if [ -z "$LD_PRELOAD" ]
+			then
+				export LD_PRELOAD="/usr/lib/libtsocks.so"
+			else
+				echo $LD_PRELOAD | grep -q "/usr/lib/libtsocks\.so" || \
+				export LD_PRELOAD="/usr/lib/libtsocks.so $LD_PRELOAD"
+		fi
+	;;
+	-off)
+		export LD_PRELOAD=`echo -n $LD_PRELOAD | sed 's/\/usr\/lib\/libtsocks.so \?//'`
+		if [ -z "$LD_PRELOAD" ]
+			then
+				unset LD_PRELOAD
+		fi
+	;;
+	-show|-sh)
+		echo "LD_PRELOAD=\"$LD_PRELOAD\""
+	;;
+	-h|-?)
+      echo "$0: Please see tsocks(1) or read comment at top of $0"
+   ;;
+	*)
+		if [ -z "$LD_PRELOAD" ]
+		then
+			export LD_PRELOAD="/usr/lib/libtsocks.so"
+		else
+			echo $LD_PRELOAD | grep -q "/usr/lib/libtsocks\.so" || \
+			export LD_PRELOAD="/usr/lib/libtsocks.so $LD_PRELOAD"
+		fi
+
+		if [ $# = 0 ]
+		then
+			${SHELL:-/bin/sh}
+		fi
+
+		if [ $# -gt 0 ]
+		then
+			exec "$@"
+		fi
+	;;
+esac
+</pre>
+从上面可以看出, tsocks这个脚本是通过修改LD_PRELOAD这个环境变量来达到它的转发网络请求的目的. 那为什么修改LD_PRELOAD这个环境变量就能达到他的转发网络请求的目的呢? 说简单点, LD_PRELOAD这个环境变量表示系统会把这个变量对应的共享库文件中的函数来覆盖目标程序中的函数, 详情请看<a href="http://blog.csdn.net/haoel/archive/2007/05/09/1602108.aspx" target="_blank">这里</a>.
+现在你应该明白了为什么tsoc -on前面为什么要加点号了吧? 你不加点号的话, tsocks脚本修改的LD_PRELOAD变量不对当前的shell进程起作用啊.
+把
+<pre lang="bash">
+. tsocks -on
+</pre>加到你的.bashrc里面, 这样每次打开新的shell会话都可以使用代理. 如果想所有的软件都使用代理的话, 包括不是在shell里面启动的, 重启一下机器, 使得你的.bashrc里面的配置对全局生效. 
+<pre lang="bash">
+. tsocks -off
+</pre>
+关闭tsocks,
+<pre lang="bash">
+. tsocks -sh
+</pre>
+显示LD_PRELOAD的值. 

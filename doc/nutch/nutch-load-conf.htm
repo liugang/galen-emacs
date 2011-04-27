@@ -1,0 +1,85 @@
+<!-- -*- html -*- -->
+
+<!-- Time-stamp: "2010-03-12 19:20:53 Friday by ahei" -->
+
+<!-- Nutch配置文件的加载 -->
+
+<img class="alignright" title="Nutch" src="screenshots/nutch-logo.gif"/>
+
+Nutch的配置文件主要有三类：
+<ul>
+  <li>Nutch插件的配置文件，这些配置文件主要是在加载插件的时候由插件自己加载的，主要是filter和normalizer插件的配置文件</li>
+  <li>Nutch自己的配置文件，nutch-default.xml和nutch-site.xml</li>
+  <li>Hadoop的配置文件，hadoop-default.xml和hadoop-site.xml</li>
+</ul>
+这些配置文件的加载顺序决定了它们的优先级，优先级低的会被优先级高的配置文件中的配置覆盖，所以要想配置好nutch，了解配置文件的加载顺序是必须的。下面我通过对nutch源码的剖析来看看nutch是怎样加载配置文件的。<!--more-->
+
+Nutch的主要命令是"./nutch crawl"，而这个crawl命令main类是org/apache/nutch/crawl/Crawl.java，我们就从Crawl.java的main方法开始。
+
+Nutch配置文件的加载主要是以下代码：
+<pre lang="java" line="1">
+  /* Perform complete crawling and indexing given a set of root urls. */
+  public static void main(String args[]) throws Exception {
+    if (args.length < 1)
+    {
+      System.out.println("Usage: Crawl <urlDir> [-dir d] [-threads n] [-depth i] [-topN N] [-r]");
+      System.out.println("-r\tremove css and javascript, default is do not remove");
+      return;
+    }
+
+    Configuration conf = NutchConfiguration.create();
+    conf.addResource("crawl-tool.xml");
+    JobConf job = new NutchJob(conf);
+</pre>
+上述代码中，"Configuration conf = NutchConfiguration.create();"生成一个NutchConfiguration的对象，NutchConfiguration是管理Nutch自己的配置文件的类，Configuration类是管理Hadoop配置文件的类，我们进入create方法：
+<pre lang="java" line="1">
+  /** Create a {@link Configuration} for Nutch. */
+  public static Configuration create() {
+    Configuration conf = new Configuration();
+    addNutchResources(conf);
+    return conf;
+  }
+</pre>
+create方法中先创建一个Configuration对象，Configuration方法如下：
+<pre lang="java" line="1">
+  /** A new configuration. */
+  public Configuration() {
+    this(true);
+  }
+
+  /** A new configuration where the behavior of reading from the default 
+   * resources can be turned off.
+   * 
+   * If the parameter {@code loadDefaults} is false, the new instance
+   * will not load resources from the default files. 
+   * @param loadDefaults specifies whether to load from the default files
+   */
+  public Configuration(boolean loadDefaults) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug(StringUtils.stringifyException(new IOException("config()")));
+    }
+    if (loadDefaults) {
+      resources.add("hadoop-default.xml");
+      resources.add("hadoop-site.xml");
+    }
+  }
+</pre>
+由此可见，当构造Configuration对象的时候，会先去加载hadoop-default.xml，然后再去加载hadoop-site.xml，所以hadoop-site.xml里面的配置会覆盖hadoop-default.xml里面的配置。
+了解了Hadoop的配置文件的加载，我们再回到刚才的create方法里面。
+现在要调用“addNutchResources(conf);”了，其定义如下：
+<pre lang="java" line="1">
+  /** Add the standard Nutch resources to {@link Configuration}. */
+  public static Configuration addNutchResources(Configuration conf) {
+    conf.addResource("nutch-default.xml");
+    conf.addResource("nutch-site.xml");
+    return conf;
+  }
+</pre>
+这里很明显看出，先加载nutch-default.xml文件，然后再加载nutch-site.xml文件。
+下面我们再沿着main方法继续往下看，该到调用“conf.addResource("crawl-tool.xml");”了，看来crawl-tool.xml最后加载，这个配置文件主要是用于配置抓取企业内部网。
+
+通过我们上面简单的源码分析，我们得出Nutch配置文件的优先级为：
+<ul>
+  <li>hadoop-site.xml要高于hadoop-default.xml</li>
+  <li>crawl-tool.xml高于nutch-site.xml，nutch-site.xml高于nutch-default.xml</li>
+</ul>

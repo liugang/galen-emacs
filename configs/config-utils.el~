@@ -1,0 +1,347 @@
+;; Filename: 3-utils-conf.el
+;;
+;; Description:
+;; Author: Galen
+;; Created: Sun Aug 22 13:22:01 2010 (+0800)
+;; Last-Updated: Sun Aug 22 13:22:02 2010 (+0800)
+;;     Update #: 1
+;; URL: http://blog.chinaunix.net/u/28157
+;; Copyright (C) 2010 Galen <galen.gang.liu@gmail.com>
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Copy word
+(defun copy-word (&optional arg)
+  "Copy words at point into kill-ring"
+  (interactive "P")
+  (let ((beg (progn (if (looking-back "[a-zA-Z0-9]" 1) (backward-word 1)) (point)))
+	(end (progn (forward-word arg) (point))))
+    (copy-region-as-kill beg end)))
+
+;; copy line
+(defun copy-line (&optional arg)
+  "Save current line into Kill-Ring without mark the line "
+  (interactive "P")
+  (let ((beg (line-beginning-position))
+	(end (line-end-position arg)))
+    (copy-region-as-kill beg end)))
+
+;; copy paragraph
+(defun copy-paragraph (&optional arg)
+  "Copy paragraphes at point"
+  (interactive "P")
+  (let ((beg (progn (backward-paragraph 1) (point)))
+	(end (progn (forward-paragraph arg) (point))))
+    (copy-region-as-kill beg end)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; move line
+(defun move-line (n)
+  "Move the current line up or down by N lines."
+  (interactive "p")
+  (setq col (current-column))
+  (beginning-of-line) (setq start (point))
+  (end-of-line) (forward-char) (setq end (point))
+  (let ((line-text (delete-and-extract-region start end)))
+    (forward-line n)
+    (insert line-text)
+    ;; restore point to original column in moved line
+    (forward-line -1)
+    (forward-char col)))
+
+(defun move-line-up (n)
+  "Move the current line up by N lines."
+  (interactive "p")
+  (move-line (if (null n) -1 (- n))))
+
+(defun move-line-down (n)
+  "Move the current line down by N lines."
+  (interactive "p")
+  (move-line (if (null n) 1 n)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; transpose windows
+(defun transpose-windows (arg)
+  "Transpose the buffers shown in two windows."
+  (interactive "p")
+  (let ((selector (if (>= arg 0) 'next-window 'previous-window)))
+    (while (/= arg 0)
+      (let ((this-win (window-buffer))
+	    (next-win (window-buffer (funcall selector))))
+	(set-window-buffer (selected-window) next-win)
+	(set-window-buffer (funcall selector) this-win)
+	(select-window (funcall selector)))
+      (setq arg (if (plusp arg) (1- arg) (1+ arg))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; go to char
+(defun wy-go-to-char (n char)
+  "Move forward to Nth occurence of CHAR.Typing `wy-go-to-char-key' again will
+move forwad to the next Nth occurence of CHAR."
+  (interactive "p\ncGo to char: ")
+  (search-forward (string char) nil nil n)
+  (while (char-equal (read-char)
+		     char)
+    (search-forward (string char) nil nil n))
+  (setq unread-command-events (list last-input-event)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; find word
+(defun wcy-isearch-word-at-point()
+  (interactive)
+  (setq isearch-string (thing-at-point 'word))
+  (isearch-search-and-update))
+
+
+;; match paren
+(defun match-paren (arg)
+  "Go to the matching paren if on a paren; otherwise insert %."
+  (interactive "p")
+  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+	((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+	(t (self-insert-command (or arg 1)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun next-user-buffer ()
+  "Switch to the next user buffer in cyclic order.\n
+User buffers are those not starting with *."
+  (interactive)
+  (next-buffer)
+  (let ((i 0))
+    (while (and (string-match "^*" (buffer-name)) (< i 50))
+      (setq i (1+ i)) (next-buffer) )))
+
+(defun previous-user-buffer ()
+  "Swithc to the previous user in cyclic order. \n
+User buffers are those not starting with *."
+  (interactive)
+  (previous-buffer)
+  (let ((i 0))
+    (while (and (string-match "^*" (buffer-name)) (< i 50))
+      (setq i (1+ i)) (previous-buffer))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; set default COPY,CUT whole line when use M-w, C-w
+(defadvice kill-ring-save (before slickcopy activate compile)
+  "When called interactively with no active region, copy a single line instead."
+  (interactive
+   (if mark-active
+	   (list (region-beginning) (region-end))
+     (list (line-beginning-position)
+		   (line-beginning-position 2)))))
+
+(defadvice kill-region (before slickcut activate compile)
+  "When called interactively with no active region, kill a single line instead."
+  (interactive
+   (if mark-active
+	   (list (region-beginning) (region-end))
+     (list (line-beginning-position)
+		   (line-beginning-position 2))
+	 )
+   ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Using IDO for bookmarks
+;; just bookmark-jump to a bookmark name using bookmark-all-names to pass the names to ido-completing-read.
+(defun bookmark-ido-find-file ()
+  "Find a bookmark using Ido."
+  (interactive)
+  (let ((bm (ido-completing-read "Choose bookmark: "
+                                 (bookmark-all-names)
+                                 nil t)))
+    (when bm
+      (bookmark-jump bm))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; find . -name "*.[chCH]" -print | etags -
+
+(defun ido-find-file-in-tag-files ()
+  (interactive)
+  (save-excursion
+	(let ((enable-recursive-minibuffers t)) (visit-tags-table-buffer))
+	(find-file (expand-file-name
+				(ido-completing-read "Project file: "
+									 (tags-table-files) nil t)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq ido-execute-command-cache nil)
+(defun ido-execute-command ()
+  (interactive)
+  (call-interactively
+   (intern
+	(ido-completing-read
+	 "M-x "
+	 (progn
+	   (unless ido-execute-command-cache
+		 (mapatoms (lambda (s)
+					 (when (commandp s)
+					   (setq ido-execute-command-cache
+							 (cons (format "%S" s) ido-execute-command-cache))))))
+	   ido-execute-command-cache)))))
+
+(add-hook 'ido-setup-hook
+		  (lambda ()
+			(setq ido-enable-flex-matching t)
+			(global-set-key "\M-x" 'ido-execute-command)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Semantic Bookmark ring is currently empty
+;(defadvice push-mark (around semantic-mru-bookmark activate)
+;  "Push a mark at LOCATION with NOMSG and ACTIVATE passed to `push-mark'.
+;If `semantic-mru-bookmark-mode' is active, also push a tag onto
+;the mru bookmark stack."
+;  (semantic-mrub-push semantic-mru-bookmark-ring
+;                      (point)
+;                      'mark)
+;  ad-do-it)
+;
+;(defun semantic-ia-fast-jump-back ()
+;  (interactive)
+;  (if (ring-empty-p (oref semantic-mru-bookmark-ring ring))
+;      (error "Semantic Bookmark ring is currently empty"))
+;  (let* ((ring (oref semantic-mru-bookmark-ring ring))
+;         (alist (semantic-mrub-ring-to-assoc-list ring))
+;         (first (cdr (car alist))))
+;    (if (semantic-equivalent-tag-p (oref first tag) (semantic-current-tag))
+;        (setq first (cdr (car (cdr alist)))))
+;    (semantic-mrub-switch-tags first)))
+;
+;(defun semantic-ia-fast-jump-or-back (&optional back)
+;  (interactive "P")
+;  (if back
+;      (semantic-ia-fast-jump-back)
+;    (semantic-ia-fast-jump (point))))
+
+
+
+
+
+
+;; (setq pulse-command-advice-flag (if window-system 1 nil))
+;; (defadvice goto-line (after pulse-advice activate)
+;;   "Cause the line that is `goto'd to pulse when the cursor gets there."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice exchange-point-and-mark (after pulse-advice activate)
+;;   "Cause the line that is `goto'd to pulse when the cursor gets there."
+;;   (when (and pulse-command-advice-flag (interactive-p)
+;;              (> (abs (- (point) (mark))) 400))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice find-tag (after pulse-advice activate)
+;;   "After going to a tag, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice tags-search (after pulse-advice activate)
+;;   "After going to a hit, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice tags-loop-continue (after pulse-advice activate)
+;;   "After going to a hit, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice pop-tag-mark (after pulse-advice activate)
+;;   "After going to a hit, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice imenu-default-goto-function (after pulse-advice activate)
+;;   "After going to a tag, pulse the line the cursor lands on."
+;;   (when pulse-command-advice-flag
+;;     (pulse-momentary-highlight-one-line (point))))
+
+;; (defadvice cua-exchange-point-and-mark (after pulse-advice activate)
+;;   "Cause the line that is `goto'd to pulse when the cursor gets there."
+;;   (when (and pulse-command-advice-flag (interactive-p)
+;;              (> (abs (- (point) (mark))) 400))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice switch-to-buffer (after pulse-advice activate)
+;;   "After switch-to-buffer, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice previous-buffer (after pulse-advice activate)
+;;   "After previous-buffer, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice next-buffer (after pulse-advice activate)
+;;   "After next-buffer, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice ido-switch-buffer (after pulse-advice activate)
+;;   "After ido-switch-buffer, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;; (defadvice beginning-of-buffer (after pulse-advice activate)
+;;   "After beginning-of-buffer, pulse the line the cursor lands on."
+;;   (when (and pulse-command-advice-flag (interactive-p))
+;;     (pulse-momentary-highlight-one-line (point))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defun insert-time ()
+  (interactive)
+  (insert (format-time-string "%Y-%m-%d %R  %A")))
+
+(defun insert-ISO ()
+  (interactive)
+  (insert (format-time-string "%Y%m%d")))
+
+(defun insert-date-verbose ()
+  (interactive)
+  (insert (format-time-string "It is now second %S of minute %M of hour %H (%l %p) on day %d of %B in year %Y in time zone %Z. It is %A, and day %j, in week %U, of %Y. ")))
+
+(defun go-story ()
+  (interactive)
+  (find-file "~/.emacs.d/doc/story.txt"))
+
+(defun go-theory ()
+  (interactive)
+  (find-file "~/.emacs.d/doc/theory.txt"))
+
+
+(defun journal ()
+  (interactive)
+  (find-file "~/.emacs.d/doc/journal.txt")
+  (end-of-buffer)
+  (insert "\n\n")
+  (insert "*")
+  (insert-time)
+  (insert "\n\n")
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (defun planner-diary-add-entry (date time text)
+;;   "Prompt for a diary entry to add to `diary-file'.  Will run
+;;     planner-annotations to make hyper links"
+;;   (interactive (list (planner-read-date)
+;; 					 (read-string "Time: ")
+;;                      (read-string "Diary entry: ")))
+;;   (save-excursion
+;; 	(save-window-excursion
+;; 	  (make-diary-entry
+;; 	   (concat
+;; 		(let ((cal-date (planner-filename-to-calendar-date date)))
+;; 		  (if european-calendar-style
+;; 			  (format "%d/%d/%d"
+;; 					  (elt cal-date 1)
+;; 					  (elt cal-date 0)
+;; 					  (elt cal-date 2))
+;; 			(format "%d/%d/%d"
+;; 					(elt cal-date 0)
+;; 					(elt cal-date 1)
+;; 					(elt cal-date 2))))
+;; 		" " time " " text " "
+;; 		(run-hook-with-args-until-success
+;; 		 'planner-annotation-functions))))))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; add this into your ~/.bashrc
+;; alias journal='emacs -nw -f journal'
+;; alias et='emacsclient -t'
+;; alias ec='emacsclient -c'

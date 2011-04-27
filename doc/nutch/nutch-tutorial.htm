@@ -1,0 +1,209 @@
+<!-- -*- html -*- -->
+
+<!-- Time-stamp: <2010-03-12 19:21:42 Friday by ahei> -->
+
+<!-- Nutch的简单使用 -->
+
+<img class="alignright" title="Nutch" src="screenshots/nutch-logo.gif"/>
+
+<a href="http://lucene.apache.org/nutch/" target="_blank">Nutch</a>是一个开源的搜索引擎，包括抓取，索引，搜索，不过它主要专注于抓取，下面我讲一下它的简单使用。<!--more-->
+
+首先，从<a href="http://apache.etoak.com/lucene/nutch/" target="_blank">这里</a>下载Nutch的最新release(作此文时最新release为1.0)，或者从<a href="http://svn.apache.org/repos/asf/lucene/nutch/" target="_blank">这里</a>直接下载源码，然后解压。解压后，打开文件$NUTCH_HOME/conf/nutch-site.xml(NUTCH_HOME为你nutch所在的文件夹，这个nutch-site文件是nutch的配置文件，不要直接修改nutch-default文件，那个是nutch的默认配置，nutch-site.xml会覆盖nutch-default.xml中的配置，详情请见<a href="nutch-load-conf.htm" target="_blank">Nutch配置文件的加载</a>。当然你也可以修改nutch-default,xml，但是nutch官方不推荐那样做)，在&lt;configuration&gt;和&lt;/configuration&gt;之间输入以下内容：
+<pre lang="xml" line="1">
+<property>
+  <name>http.agent.name</name>
+  <value>spider</value>
+  <description>HTTP 'User-Agent' request header. MUST NOT be empty - 
+  please set this to a single word uniquely related to your organization.
+
+  NOTE: You should also check other related properties:
+
+	http.robots.agents
+	http.agent.description
+	http.agent.url
+	http.agent.email
+	http.agent.version
+
+  and set their values appropriately.
+
+  </description>
+</property>
+
+<property>
+  <name>http.robots.agents</name>
+  <value>spider,*</value>
+  <description>The agent strings we'll look for in robots.txt files,
+  comma-separated, in decreasing order of precedence. You should
+  put the value of http.agent.name as the first agent name, and keep the
+  default * at the end of the list. E.g.: BlurflDev,Blurfl,*
+  </description>
+</property>
+</pre>
+其中字段“http.agent.name”为你的crawler的名字(记得早期的版本可以不填的，现在的版本不填就报错)，字段http.robots.agents，也可以不填，但是不填的话抓取的时候nutch会报：
+<pre lang="text">
+Fetcher: Your 'http.agent.name' value should be listed first in 'http.robots.agents' property.
+</pre>
+烦的慌，你要是不怕烦的话可以不填。
+然后再打开文件$NUTCH_HOME/conf/crawl-urlfilter.txt，把该文件里面的MY.DOMAIN.NAME替换成你想抓取的域名，比如apache.org。
+
+修改完以上的配置，现在就可以抓取了，抓取之前你得建立一个文件，里面存放你要抓取的url，比如建立一个文件urls，内容为：http://lucene.apache.org/nutch/，把该文件放到目录urls下面，Nutch抓取的时候只能对一个目录下的所有文件中的url进行抓取，不能对一个文件中的url进行抓取(这是由它的分布式系统Hadoop的特性决定的)。抓取很简单：
+<pre lang="bash">
+$NUTCH_HOME/bin/nutch crawl urls -dir crawl -depth 2
+</pre>
+urls为待抓取的urls目录，crawl为输出目录(可以不写，默认为"crawl-"加当前日期和时间)，depth为抓取深度，默认为5。输出如下：
+<pre lang="bash" line="1">
+ahei@ubuntu3:~/nutch-1.0/bin$ ./nutch crawl urls -dir crawl -depth 2
+crawl started in: crawl
+rootUrlDir = urls
+threads = 10
+depth = 2
+	Injector: starting
+Injector: crawlDb: crawl/crawldb
+Injector: urlDir: urls
+Injector: Converting injected urls to crawl db entries.
+Injector: Merging injected urls into crawl db.
+Injector: done
+Generator: Selecting best-scoring urls due for fetch.
+Generator: starting
+Generator: segment: crawl/segments/20091126170222
+Generator: filtering: true
+Generator: jobtracker is 'local', generating exactly one partition.
+Generator: Partitioning selected urls by host, for politeness.
+Generator: done.
+Fetcher: Your 'http.agent.name' value should be listed first in 'http.robots.agents' property.
+Fetcher: starting
+Fetcher: segment: crawl/segments/20091126170222
+Fetcher: threads: 10
+QueueFeeder finished: total 1 records.
+fetching http://lucene.apache.org/nutch/
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-finishing thread FetcherThread, activeThreads=1
+-activeThreads=1, spinWaiting=0, fetchQueues.totalSize=0
+-activeThreads=1, spinWaiting=0, fetchQueues.totalSize=0
+-finishing thread FetcherThread, activeThreads=0
+-activeThreads=0, spinWaiting=0, fetchQueues.totalSize=0
+-activeThreads=0
+Fetcher: done
+CrawlDb update: starting
+CrawlDb update: db: crawl/crawldb
+CrawlDb update: segments: [crawl/segments/20091126170222]
+CrawlDb update: additions allowed: true
+CrawlDb update: URL normalizing: true
+CrawlDb update: URL filtering: true
+CrawlDb update: Merging segment data into db.
+CrawlDb update: done
+Generator: Selecting best-scoring urls due for fetch.
+Generator: starting
+Generator: segment: crawl/segments/20091126170233
+Generator: filtering: true
+Generator: jobtracker is 'local', generating exactly one partition.
+Generator: Partitioning selected urls by host, for politeness.
+Generator: done.
+Fetcher: Your 'http.agent.name' value should be listed first in 'http.robots.agents' property.
+Fetcher: starting
+Fetcher: segment: crawl/segments/20091126170233
+Fetcher: threads: 10
+QueueFeeder finished: total 38 records.
+fetching http://wiki.apache.org/nutch/
+fetching http://issues.apache.org/jira/browse/Nutch
+fetching http://lucene.apache.org/nutch/tutorial.html
+-activeThreads=10, spinWaiting=7, fetchQueues.totalSize=35
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=35
+fetching http://lucene.apache.org/nutch/skin/breadcrumbs.js
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=34
+Error parsing: http://lucene.apache.org/nutch/skin/breadcrumbs.js: org.apache.nutch.parse.ParseException: parser not found for contentType=application/javascript url=http://lucene.apache.org/nutch/skin/breadcrumbs.js
+	at org.apache.nutch.parse.ParseUtil.parse(ParseUtil.java:74)
+	at org.apache.nutch.fetcher.Fetcher$FetcherThread.output(Fetcher.java:766)
+	at org.apache.nutch.fetcher.Fetcher$FetcherThread.run(Fetcher.java:552)
+
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=34
+fetching http://lucene.apache.org/nutch/version_control.html
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=33
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=33
+fetching http://wiki.apache.org/nutch/FAQ
+fetching http://lucene.apache.org/nutch/apidocs-0.8.x/index.html
+-activeThreads=10, spinWaiting=8, fetchQueues.totalSize=31
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=31
+fetching http://lucene.apache.org/hadoop/
+-activeThreads=10, spinWaiting=8, fetchQueues.totalSize=30
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=30
+fetching http://forrest.apache.org/
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=29
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=29
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=29
+fetching http://lucene.apache.org/nutch/apidocs-0.9/index.html
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=28
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=28
+fetching http://lucene.apache.org/nutch/credits.html
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=27
+fetching http://www.apache.org/dist/lucene/nutch/CHANGES-0.9.txt
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=26
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=26
+-activeThreads=10, spinWaiting=9, fetchQueues.totalSize=26
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=26
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=26
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=26
+-activeThreads=10, spinWaiting=10, fetchQueues.totalSize=26
+</pre>
+抓取完数据之后怎样检验呢？使用命令：
+<pre lang="bash">
+$NUTCH_HOME/bin/nutch org.apache.nutch.searcher.NutchBean apache
+</pre>
+这个命令会给出apache的搜索结果，这个命令默认是对crawl目录进行搜索，这是代码证明：
+<pre lang="java" line="1">
+文件：$NUTCH_HOME/src/java/org/apache/nutch/searcher/NutchBean.java:87
+  public NutchBean(Configuration conf, Path dir) throws IOException {
+    this.conf = conf;
+    this.fs = FileSystem.get(this.conf);
+    if (dir == null) {
+      dir = new Path(this.conf.get("searcher.dir", "crawl"));
+    }
+</pre>
+要想对其他目录进行搜索，在nutch-site.xml中加入以下内容：
+<pre lang="xml" line="1">
+<property>
+  <name>searcher.dir</name>
+  <value>other-searcher-dir</value>
+  <description>
+  Path to root of crawl.  This directory is searched (in
+  order) for either the file search-servers.txt, containing a list of
+  distributed search servers, or the directory "index" containing
+  merged indexes, or the directory "segments" containing segment
+  indexes.
+  </description>
+</property>
+</pre>
+搜索结果如下：
+<pre lang="bash" line="1">
+ahei@ubuntu3:~/nutch-1.0/bin$ ./nutch org.apache.nutch.searcher.NutchBean apache
+Total hits: 25
+ 0 20091126170222/http://lucene.apache.org/nutch/
+ ... Lucene. January 2005: Nutch Joins Apache Incubator Nutch is a ... determined that the Apache license is the appropriate
+ 1 20091126170233/http://www.apache.org/
+ ... including Apache XML, Apache Jakarta, Apache Cocoon, Apache Xerces, Apache Ant, and Apache ... Source projects such as NoSQL, Apache ... 
+ 2 20091126170233/http://www.apache.org/licenses/
+ ... Copyright © 2009 The Apache Software Foundation, Licensed under the ... Apache License, Version 2.0 . Apache ... Apache and the  ... 
+ 3 20091126170233/http://forrest.apache.org/
+ ... Welcome to Apache Forrest apache > forrest   Welcome Developers Versioned Docs ... Example sites Thanks Related projects Apache Gump Apache ... 
+ 4 20091126170233/http://lucene.apache.org/
+ ... the release of Apache Mahout 0.1. Apache Mahout is a subproject ... on top of  ... 
+ 5 20091126170233/http://wiki.apache.org/nutch/
+FrontPage - Nutch Wiki Search: Nutch Wiki Login FrontPage FrontPage RecentChanges FindPage HelpContents Immutable Page Comments Info Attachments More Actions:  ... 
+ 6 20091126170233/http://lucene.apache.org/nutch/index.html
+ ... Lucene. January 2005: Nutch Joins Apache Incubator Nutch is a ... determined that the Apache license is the appropriate
+ 7 20091126170233/http://wiki.apache.org/nutch/FAQ
+ ... all available at http://lucene.apache.org/nutch/mailing_lists.html . How ... 
+ 8 20091126170233/http://lucene.apache.org/nutch/tutorial8.html
+ ... http://([a-z0-9]*\.)*apache.org/ This will include any ... in the domain apache.org . Edit the file ... 
+ 9 20091126170233/http://lucene.apache.org/nutch/tutorial.html
+ ... crawl to the apache.org domain, the line ... http://([a-z0-9]*\.)*apache.org/ This will include any
+</pre>
+
+Nutch的入门使用很简单吧，上面所述只是在一台机器上进行抓取，Nutch有个分布式系统Hadoop，可以实现分布式抓取，请看<a href="nutch-distributed-crawl.htm" target="_blank">Nutch的分布式抓取</a>。

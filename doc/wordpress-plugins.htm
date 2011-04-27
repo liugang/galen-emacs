@@ -1,0 +1,150 @@
+<!-- -*- html -*- -->
+
+<!-- Time-stamp: "2010-03-29 11:41:51 Monday by ahei" -->
+
+<!-- 我的wordpress插件 -->
+
+<img class="alignright" title="WordPress" src="screenshots/wordpress.jpg" width="100" height="100"/>
+
+最近自己用wordpress把<a href="blog-reborn.htm" target="_blank">博客搭起来了</a>，由于以前在yo2上写博客的时候，wordpress都是yo2已搭好的，插件也都是他们加的，用户不能自己上传插件，少了很多麻烦，也多了一些不方便。这次自己搭博客，由于没有以前yo2上wordpress的插件列表，只有自己根据印象一个的去找插件，找的过程中，也发现了一些比较好的插件，这里我记录下来，做备录用，也供没有搭过wordpress的同志参考。（注：以下插件根据重要性和功能强大性做基本有序排序，这些插件都可以根据名字去wordpress<a href="http://wordpress.org/extend/plugins/" target="_blank">插件官网</a>下载。）<!--more-->
+
+<ul>
+  <li><span style="color: #0000ff;">Google XML Sitemaps</span>
+    这个插件会生成你网站的xml地图，发送给google，yahoo，ask，bing等搜索引擎，而且可以配置成当你写了一篇博文后，自动生成xml地图给搜索引擎，使得搜索引擎能尽快知道你博客的更新。我使用了这个插件后，写了一篇博文后，有时候只需要一二十分钟后就能在google里检索到我刚写的博文，非常实用。
+  </li>
+
+  <li><span style="color: #0000ff;">Baidu Sitemap Generator</span>
+    和google XML Sitemaps插件功能类似，也是生成网站的xml地图，方便百度爬取，因为百度的sitemap xml和其他搜索引擎不一样，所以才有了这个插件。这个插件不支持你发文后通知百度。
+  </li>
+
+  <li><span style="color: #0000ff;">jadedcoder Sticky Permalinks</span>
+    这个插件太强悍了，随便你怎么更改你网站上的任何链接，旧的链接会重定向到新的链接，这样你的网站就不会因为更改了链接而丢失任何流量了。
+  </li>
+
+  <li><span style="color: #0000ff;">Redirection</span>
+    这个插件可以根据你配置的模板，把一个页面重定向到另一个页面，由于我的网站上的链接基本都是.htm的结尾，我就配置了把所有的.html结尾的url重定向到对应的.htm结尾的页面。这个插件貌似不支持中文url。
+  </li>
+  
+  <li><span style="color: #0000ff;">Custom Permalinks</span>
+    对你博客中的分类，tag，页面，博文进行任意的url自定义，与你的永久链接设置不冲突，非常好用。安装完成后，可以去分类，tag，页面，博文编辑页面，里面有一个“Custom Permalink”选项，可以自己输入任意你喜欢的url。你可以把你的url都弄成".htm"或".html"结尾，让搜索引擎更好的索引你的博客。
+  </li>
+
+  <li><span style="color: #0000ff;">All in One SEO Pack</span>
+    对你的网站做SEO，挺好用的
+  </li>
+
+  <li><span style="color: #0000ff;">Lightbox Gallery</span>
+    这个插件可以让你网站上的图片有jQuery中的lightbox效果，<a href="emacs.htm" target="_blank">这里</a>有效果演示。安装好这个插件后，在文章你增加相册，会自动加上lightbox效果。但是默认的，弹出的图片是缩略图，把代码改成
+    <pre lang="html4strict">
+[ gallery lightboxsize="full" ]
+    </pre>
+    弹出的图片就是原来的图片。
+    向文章中增加单个图片的时候，默认的没有lightbox效果，在a标签中增加rel="lightbox"就可以使单个图片也有lightbox效果，就像下面这样：
+    <pre lang="html4strict" line="1">
+<a href="image.jpg" rel="lightbox" title="this is a caption">
+  <img src="thumbnail.jpg" alt="" />
+</a>
+    </pre>
+  </li>
+  
+  <li><span style="color: #0000ff;">Faster Image Insert</span>
+    wordpress默认的在文章里增加图片的时候每次只能增加一张，非常麻烦，这个插件可以让你每次可以增加多张，非常方便。
+  </li>
+
+  <li><span style="color: #0000ff;">Google Analytics for WordPress</span>
+    这个插件只需要你填写你的google analytics帐号id，它会自动在你的每个页面增加google analytics的代码，非常不错。
+  </li>
+
+  <li><span style="color: #0000ff;">Wordpress Thread Comment</span>
+    用树状显示评论，还可以直接在前台管理评论，挺好用的。<a href="auto-complete_yasnippet.htm#comment-72" target="_blank">这里</a>是效果图。
+  </li>
+
+  <li><span style="color: #0000ff;">WP-CodeBox</span>
+    非常强大的高亮代码的插件，基于GeSHi, <a href="http://wordpress.org/extend/plugins/wp-syntax/other_notes/" target="_blank">支持的语言</a>非常多，常见的就不用说了，还包括apt_sources，autoit，bash，cmake，diff，email，lisp等等等等，很猛吧。<a href="dea.htm" target="_blank">这里</a>是效果图。
+  </li>
+  
+  <li><span style="color: #0000ff;">WP-Syntax</span>
+    也是一款基于GeSHi的高亮代码的插件.
+  </li>
+
+  <li><span style="color: #0000ff;">WP-RecentComments</span>
+    安装完这个插件后，你可以在你的“小工具”里面增加这个工具，用ajax显示最新的评论，还可以显示评论里面的表情。我的博客右侧栏的“最新评论”就是用这个插件生成的。
+  </li>
+
+  <li><span style="color: #0000ff;">Twitter Tools</span>
+    显然，这是一个twitter的插件，你可以在“小工具”里面增加显示最新twitter信息的小工具。我的博客右侧栏的“Twitter”就是用这个插件生成的。还有，当你在博客上发文章的时候，它会自动用你的twitter帐号发送一条tweet，非常不错。
+  </li>
+
+  <li><span style="color: #0000ff;">Dagon Design Sitemap Generator</span>
+    为你的博客产生博客地图，我的<a href="map" target="_blank">博客地图</a>就是用这个插件生成的。
+  </li>
+  
+  <li><span style="color: #0000ff;">KB robots.txt</span>
+    可以直接在wp后台修改robots.txt，安装完之后，你访问你的robots.txt，发现原来的内容已经没了，不用担心，这个插件截获了http://yourblog/robots.txt的请求，把它的插件里面的robots.txt显示而已，你禁用掉这个插件后，你原来的robots.txt又能看到了。
+  </li>
+
+  <li><span style="color: #0000ff;">My Link Order</span>
+    对你博客中的链接进行排序，挺实用的。使用的时候，在“小工具”里面把“My Link Order”拖到sidebar里面即可。我这次搭博客的时候，我没有把“My Link Order”拖到sidebar里面，用的还是以前的“链接”，我定义的链接顺序一直没起作用，我还怀疑这个插件不能用了呢，最后才搞明白怎么回事。
+  </li>
+
+  <li><span style="color: #0000ff;">My Page Order</span>
+    对你博客中的页面进行排序，也挺实用的
+  </li>
+
+  <li><span style="color: #0000ff;">Category Order</span>
+    对你博客中的分类进行排序
+  </li>
+
+  <li><span style="color: #0000ff;">Top Level Categories</span>
+    wordpress默认的分类url是/category/catname, 这个插件为你去掉category,直接变成/catname. 
+  </li>
+
+  <li><span style="color: #0000ff;">Autolink URI</span>
+    对你的博文中的url自动加上链接，不错。
+  </li>
+  
+  <li><span style="color: #0000ff;">Most Commented Widget</span>
+    安装完这个插件后，你可以在你的“小工具”里面增加这个工具，可以显示最多的评论。我的博客右侧栏的“最多评论”就是用这个插件生成的。
+  </li>
+
+  <li><span style="color: #0000ff;">NextGEN Gallery</span>
+    这是一个相册管理软件，可以批量导入相册。由于默认的wordpress批量导入图片很麻烦，我一般都是用这个插件批量扫描服务器上的图片目录，把它们增加到相册里，而且它也会给这些图片生成缩略图，然后我手工写图片的html。扫描图片之前，要先配置一下它使得它扫描图片时，不要压缩原来的图片。
+  </li>
+
+  <li><span style="color: #0000ff;">Simple Tags</span>
+    这是一个管理tag的插件，它可以自动根据你的关键词列表生成你文章中的tag，我文章中的tag就是根据这个插件自动生成的。
+  </li>
+
+  <li><span style="color: #0000ff;">Permalink Finder</span>
+    这个插件可以使得即使用户输入错了url，也可以正确到达用户所需要的页面。比如，我有一个页面url是blog-reborn.htm，用户输入blog-reborna.htm也能到达这个页面。挺好用的。
+  </li>
+
+  <li><span style="color: #0000ff;">akismet</span>
+    这是一个阻止垃圾评论的插件,可以根据你已有的垃圾评论进行学习,来更好的识别垃圾评论. 我的博客曾经有一段时间被人发大量垃圾评论, 加了这个插件后, 好多了, 自动把它们识别为垃圾评论. 
+  </li>
+
+  <li><span style="color: #0000ff;">WP-UserOnline</span>
+    这个插件可以看到你博客上的在线用户和爬虫
+  </li>
+
+  <li><span style="color: #0000ff;">Custom Smilies</span>
+    为评论增加表情，我的博客的评论里面的表情就是这个插件的效果。
+  </li>
+
+  <li><span style="color: #0000ff;">Shockingly Simple Favicon</span>
+    在你的网站首页head标签内增加以下代码：
+    <pre lang="html4strict">
+<link rel="shortcut icon" href="PATH_TO_ICON/favicon.ico"/>
+    </pre>
+    就可以在地址栏看到你设定的图版。
+    Shockingly Simple Favicon这个插件很简单，就是它帮你增加这些代码。我博客的地址栏图标就是这个插件生成的。
+  </li>
+
+  <li><span style="color: #0000ff;">WordPress Database Backup</span>
+    如果你没有管理后台数据库的权限，可以用这个插件备份你的数据库，这个插件还可以定时备份，还可以把备份文件发到你的邮箱。
+  </li>
+
+  <li><span style="color: #0000ff;">WP-PageNavi</span>
+    wordpress默认的翻页链接只显示前一页和后一页，这个插件可以显示多个翻页链接。我博客最下面的翻页链接就是这个插件生成的。
+  </li>
+</ul>
