@@ -1,0 +1,41 @@
+1. DESCRIPTION:
+
+	this is my emacs config for emacs 24
+
+you can get emacs 24 from git version system
+
+home page: http://savannah.gnu.org/projects/emacs/#
+
+
+the URL of git: http://savannah.gnu.org/git/?group=emacs
+
+
+
+	# git clone git://git.savannah.gnu.org/emacs.git
+
+	# cd emacs
+
+	# ./configure
+
+	# make
+
+	# sudo make install
+
+
+
+2. INSTALL:
+
+	# git clone git@github.com:liugang/galen-emacs.git
+
+	# mv .emacs.d{,-bak}
+
+	# mv galen-emacs ~/.emacs.d
+
+	# cd ~/.emacs.d
+
+	# make
+
+
+
+
+start your emacs
