@@ -1,15 +1,1 @@
 BZR merge-modified list format 1
-file_id: cedet.el-20100824174052-438azmcl2y47lvam-240
-hash: e9a5910b3a3d9fd64a3c75f7bcdb8e5501a422a3
-
-file_id: edeemacs.el-20100824174052-438azmcl2y47lvam-838
-hash: febf8b1bdd847e6af2cc75ad260c3d430effd9d4
-
-file_id: wisentcomp.el-20100824174052-438azmcl2y47lvam-167
-hash: 8e60cc5f864a0c40de033204519b16d4f1ab9d64
-
-file_id: semantictagls.el-20100824174052-438azmcl2y47lvam-284
-hash: 7bec6795ae7a60fb171c1d59238f6d11202154bc
-
-file_id: inversion.el-20100824174052-438azmcl2y47lvam-231
-hash: f8110d8ff9a7d7c9aa1dc7faaa210980817bcdfd

@@ -8,15 +8,15 @@
 ;; http://emacser.com/install-cedet.htm
 ;; http://emacser.com/cedet.htm
 
-(when mswin
-  (defvar cedet-path (concat my-emacs-lisps-path "cedet") "Path of `cedet'")
-  (my-add-subdirs-to-load-path cedet-path))
+;; (when mswin
+;;   (defvar cedet-path (concat my-emacs-lisps-path "cedet") "Path of `cedet'")
+;;   (my-add-subdirs-to-load-path cedet-path))
 
 (require 'cedet)
 ;(require 'cedet-eieio-settings)
 ;(require 'cedet-ede-settings)
 ;(require 'cedet-cogre-settings)
-(require 'cedet-semantic-settings)
+(require 'galen-cedet-semantic-settings)
 ;(require 'cedet-srecode-settings)
 ;(require 'cedet-speedbar-settings)
 
@@ -25,13 +25,13 @@
 ;(require 'pulse-settings)
 
 ;;;###autoload
-(defun cedet-settings-4-info ()
+(defun galen-func/cedet-settings-4-info ()
   "`cedet' settings for `info'."
   (info-initialize)
   (dolist (package `("cogre" "common" "ede" "eieio" "semantic/doc" "speedbar" "srecode"))
-    (add-to-list 'Info-directory-list (concat my-emacs-lisps-path "cedet/" package "/"))))
+    (add-to-list 'Info-directory-list (concat galen-const/emacs-path "cedet/" package "/"))))
 
 (eval-after-load "info"
-  `(cedet-settings-4-info))
+  `(galen-func/cedet-settings-4-info))
 
-(provide 'cedet-settings)
+(provide 'galen-cedet-settings)

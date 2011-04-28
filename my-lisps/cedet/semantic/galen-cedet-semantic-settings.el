@@ -1,24 +1,3 @@
-;; Copyright (C) 2010 ahei
-
-;; Author: ahei <ahei0802@gmail.com>
-;; URL: http://code.google.com/p/dea/source/browse/trunk/my-lisps/cedet-semantic-settings.el
-;; Time-stamp: <2011-04-21 16:52:54 Thursday by galen>
-
-;; This  file is free  software; you  can redistribute  it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by  the Free Software Foundation;  either version 3,
-;; or (at your option) any later version.
-
-;; This file is  distributed in the hope that  it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR  A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You  should have  received a  copy of  the GNU  General Public
-;; License along with  GNU Emacs; see the file  COPYING.  If not,
-;; write  to  the Free  Software  Foundation,  Inc., 51  Franklin
-;; Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;(semantic-load-enable-excessive-code-helpers)
@@ -39,7 +18,7 @@
 
 ;;  1. semantic-load-enable-minimum-features
 
-;(semantic-load-enable-minimum-features)
+(semantic-load-enable-minimum-features)
 
 ;; 这个函数开启了最基本的三个特性：
 
@@ -172,7 +151,7 @@
  global-map
  `(("C-x M-j" semantic-complete-jump)))
 
-(defun cedet-semantic-settings ()
+(defun galen-func/cedet-semantic-settings ()
   "Settings for `semantic'."
   (eal-define-keys
    `(c-mode-base-map makefile-gmake-mode-map python-mode-map perl-mode-map sh-mode-map)
@@ -180,20 +159,20 @@
      ("C-c j"   semantic-complete-jump-local)
      ("C-c n"   senator-next-tag)
      ("C-c p"   senator-previous-tag)
-     ("C-c M-m" semantic-goto-local-main)
-     ("C-c M-M" semantic-goto-main)))
+     ("C-c M-m" galen-func/semantic-goto-local-main)
+     ("C-c M-M" galen-func/semantic-goto-main)))
 
-  (defun semantic-goto-main ()
+  (defun galen-func/semantic-goto-main ()
     "Jump to main function."
     (interactive)
-    (semantic-goto-tag 'main))
+    (galen-func/semantic-goto-tag 'main))
 
-  (defun semantic-goto-local-main ()
+  (defun galen-func/semantic-goto-local-main ()
     "Jump to local main function."
     (interactive)
-    (semantic-goto-local-tag 'main))
+    (galen-func/semantic-goto-local-tag 'main))
 
-  (defun semantic-goto-local-tag (tag)
+  (defun galen-func/semantic-goto-local-tag (tag)
     "Jump to local tag."
     (interactive "STag goto: ")
     (let* ((semantic-completion-collector-engine (semantic-collector-buffer-deep "" :buffer (current-buffer)))
@@ -208,7 +187,7 @@
         (semantic-momentary-highlight-tag tag)
         (working-message "%S: %s " (semantic-tag-class tag) (semantic-tag-name  tag)))))
 
-  (defun semantic-goto-tag (tag)
+  (defun galen-func/semantic-goto-tag (tag)
     "Jump to tag."
     (interactive "STag goto: ")
     (let* ((semantic-completion-collector-engine
@@ -243,40 +222,41 @@
      ("," emaci-\,)))
 
   ;; system include path
-  (if (or mswin cygwin)
-      (dolist (mode '(c-mode c++-mode))
-        (semantic-add-system-include "c:/cygwin/usr/include/" mode))))
+  ;; (if (or mswin cygwin)
+  ;;     (dolist (mode '(c-mode c++-mode))
+  ;;       (semantic-add-system-include "c:/cygwin/usr/include/" mode)))
+)
 
-(defun semantic-decorate-include-settings ()
+(defun galen-func/semantic-decorate-include-settings ()
   "Settings of `semantic-decorate-include'."
   (eal-define-keys
    'semantic-decoration-on-include-map
    `(("." semantic-decoration-include-visit))))
 
-(defun cedet-semantic-idle-settings ()
+(defun galen-func/cedet-semantic-idle-settings ()
   "Settings for `semantic-idle'."
-  (defun semantic-idle-tag-highlight-idle-command ()
+  (defun galen-func/semantic-idle-tag-highlight-idle-command ()
     "Highlight the tag, and references of the symbol under point.
 Call `semantic-analyze-current-context' to find the refer ence tag.
 Call `semantic-symref-hits-in-region' to identify local references."
     (interactive)
     (semantic-idle-tag-highlight-idle-function))
 
-  (defun semantic-idle-summary-idle-command ()
+  (defun galen-func/semantic-idle-summary-idle-command ()
     "Display a tag summary of the lexical token under the cursor.
 Call `semantic-idle-summary-current-symbol-info' for getting the
 current tag to display information."
     (interactive)
     (semantic-idle-summary-idle-function))
 
-  (defun semantic-refresh-tags ()
+  (defun galen-func/semantic-refresh-tags ()
     "Execute `semantic-idle-scheduler-refresh-tags'"
     (interactive)
     (semantic-idle-scheduler-refresh-tags))
 
   (eal-define-keys
    `(c-mode-base-map)
-   `(("C-c M-s" semantic-idle-summary-idle-command))))
+   `(("C-c M-s" galen-func/semantic-idle-summary-idle-command))))
 
 (defun semantic-decorate-mode-settings ()
   "Settings of `semantic-decorate-mode'."
@@ -293,15 +273,15 @@ current tag to display information."
    ("q" delete-current-window)))
 
 ;; (eval-after-load "semantic-decorate-include"
-;;   `(semantic-decorate-include-settings))
+;;   `(galen-func/semantic-decorate-include-settings))
 
 ;; (eval-after-load "semantic-decorate-mode"
 ;;   `(semantic-decorate-mode-settings))
 
 (eval-after-load "semantic-idle"
-  `(cedet-semantic-idle-settings))
+  `(galen-func/cedet-semantic-idle-settings))
 
 (eval-after-load "semantic"
-  `(cedet-semantic-settings))
+  `(galen-func/cedet-semantic-settings))
 
-(provide 'cedet-semantic-settings)
+(provide 'galen-cedet-semantic-settings)

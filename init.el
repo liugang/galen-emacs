@@ -66,10 +66,14 @@
 ;; 高亮匹配的括号, 很实用
 (require 'galen-highlight-parentheses-settings)
 
-;; 用来显示当前光标在哪个函数
-(require 'which-func-settings)
 
-;; (require 'cedet-settings)
+(require 'galen-cedet-settings)
+
+;; 用来显示当前光标在哪个函数
+(require 'galen-which-func-settings)
+
+
+
 
 ;; ;; ecb 代码浏览器
 ;; ;(require 'ecb-settings)

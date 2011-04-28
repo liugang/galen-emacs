@@ -101,6 +101,9 @@
 
 (defvar highlight-symbol-timer nil)
 
+;; symbol stack,
+(defvar highlight-symbol-var nil)
+
 (defun highlight-symbol-update-timer (value)
   (when highlight-symbol-timer
     (cancel-timer highlight-symbol-timer))
