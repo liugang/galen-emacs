@@ -35,6 +35,14 @@ the URL of git: http://savannah.gnu.org/git/?group=emacs
 
 	# make
 
+3. CEDET
+	# cd ~/.emacs.d/plugins
+
+	# bzr checkout bzr://cedet.bzr.sourceforge.net/bzrroot/cedet/code/trunk cedet
+
+	# ~/.emacs.d
+
+	# make
 
 
 
