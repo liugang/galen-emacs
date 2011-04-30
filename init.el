@@ -196,6 +196,7 @@
 (require 'galen-image-mode-settings)
 
 
+
 ;; ;; 方便的在kill-ring里寻找需要的东西
 ;; (require 'browse-kill-ring-settings)
 

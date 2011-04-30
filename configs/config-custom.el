@@ -198,7 +198,13 @@
  `(c-mode-base-map awk-mode-map)
  `(("{" galen-func/skeleton-c-mode-left-brace)))
 
+(ido-mode t)
+
 (eal-define-keys-commonly
  global-map
  `(("C-M-]" galen-func/ywb-indent-accoding-to-paren)
-   ("\C-]" galen-func/goto-paren)))
+   ("C-x f" ido-find-file)
+   ))
+
+
+
