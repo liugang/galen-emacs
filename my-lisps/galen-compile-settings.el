@@ -1,18 +1,15 @@
-;; -*- Emacs-Lisp -*-
-
-;; Time-stamp: <2011-02-18 11:30:55 Friday by taoshanwen>
-
-(require 'util)
-
 ;; 智能编译
 (require 'my-smart-compile)
 
 (defalias 'cpl 'compile)
 
 (eal-define-keys
- (append makefile-mode-map-list
-         '(c-mode-base-map svn-status-mode-map sh-mode-map
-                           compilation-mode-map ruby-mode-map))
+ (append galen-var/makefile-mode-map-list
+         '(c-mode-base-map
+           svn-status-mode-map
+           sh-mode-map
+	   compilation-mode-map
+	   ruby-mode-map))
  `(("C-c C-m"  make-sb)
    ("C-c m"    make-check-sb)
    ("C-c M"    make-clean-sb)
@@ -23,8 +20,8 @@
 (eal-define-keys
  'java-mode-map
  `(("C-c C-m" ant-sb)
-   ("C-c M"	  ant-clean-sb)
-   ("C-c m"	  ant-test-sb)))
+   ("C-c M"   ant-clean-sb)
+   ("C-c m"   ant-test-sb)))
 
 (require 'compile-misc)
 
@@ -33,15 +30,15 @@
  `(("M-n" next-error)
    ("M-p" previous-error)))
 
-(defun compile-settings ()
+(defun galen-func/compile-settings ()
   "Settings for `compile'."
   ;; 设置编译命令
   (setq compile-command "make -k")
 
   (eal-define-keys
-   makefile-mode-map-list
-   `(("M-p"	  previous-error)
-     ("M-n"	  next-error)
+   galen-var/makefile-mode-map-list
+   `(("M-p"   previous-error)
+     ("M-n"   next-error)
      ("C-c p" makefile-previous-dependency)
      ("C-c n" makefile-next-dependency)))
 
@@ -58,6 +55,6 @@
    ("w" scroll-down)))
 
 (eval-after-load "compile"
-  '(compile-settings))
+  '(galen-func/compile-settings))
 
-(provide 'compile-settings)
+(provide 'galen-compile-settings)

@@ -1,60 +1,34 @@
-;; -*- Emacs-Lisp -*- 
-
-;; Time-stamp: <2010-12-01 11:58:13 Wednesday by taoshanwen>
-
-;;; selecte-buffer.el --- Select buffer like Alt-tab on linux system
-
-;; Copyright (C) 2009 ahei
-
-;; Author: ahei <ahei0802@126.com>
-;; Keywords: select, buffer
-
-;; This file is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This file is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-
 ;;; Commentary:
 
 ;; 可以像linux下Alt-tab那样切换窗口
-;; select-buffer-forward(M-N)下一个窗口
-;; select-buffer-backward(M-P)上一个窗口
+;; galen-func/select-buffer-forward(M-N)下一个窗口
+;; galen-func/select-buffer-backward(M-P)上一个窗口
 ;; 当确定一个窗口后,按C-g取消选择这个窗口,回到以前的窗口,
 ;; 按其他键进入这个窗口, 这个窗口会成功当前窗口
 
 ;; 使用
-;; (require 'select-buffer)
+;; (require 'galen-select-buffer)
 ;; TODO: 如果出现bug, C-x t不显示`sb-buffer-name'buffer
 
 ;; Bug
 ;; 使用这个扩展时如果遇到问题, M-x sb-toggle-keep-buffer(C-x t)暂时关掉
 ;; 该扩展, 然后再M-x sb-toggle-keep-buffer(C-x t)打开该扩展
 
-(require 'util)
-(require 'ahei-face)
+;(require 'util)
+;(require 'ahei-face)
 (require 'diff-mode)
 
 (apply-define-key
  global-map
- `(("M-N"   select-buffer-forward)
-   ("M-P"   select-buffer-backward)
+ `(("M-N"   galen-func/select-buffer-forward)
+   ("M-P"   galen-func/select-buffer-backward)
 ;;   ("C-x t" sb-toggle-keep-buffer)
-   ("M-'"   switch-to-other-buffer)))
+   ("M-'"   galen-func/switch-to-other-buffer)))
 
 (apply-define-key
  diff-mode-map
- `(("M-N" select-buffer-forward)
-   ("M-P" select-buffer-backward)))
+ `(("M-N" galen-func/select-buffer-forward)
+   ("M-P" galen-func/select-buffer-backward)))
 
 (defvar sb-active-buffer-face   'red-face   "default face for active buffer")
 (defvar sb-inactive-buffer-face 'white-face "default face for inactive buffer")
@@ -79,7 +53,7 @@
        (if (and (number-or-marker-p (ad-get-arg 0)) (< (ad-get-arg 0) 0)) -1 1) (ad-get-arg 1))))
 
 (defadvice one-window-p (after sb-one-window-p)
-  "Advice for `one-window-p' in `select-buffer'."
+  "Advice for `one-window-p' in `galen-func/select-buffer'."
   (let ((win (selected-window))
         one)
     (save-window-excursion
@@ -210,7 +184,7 @@
   (sb-disp-buf-list buffer-list)
   (switch-to-buffer (nth sb-cur-buffer-index buffer-list) t))
 
-(defun select-buffer (&optional arg)
+(defun galen-func/select-buffer (&optional arg)
   "像windows中Alt+Tab那样选择buffer, 如果ARG为nil, 则向前选择buffer, 否则向后选择buffer"
   (let* ((select-function (if arg 'sb-buffer-backword 'sb-buffer-forward))
          (buffer-list (sb-buffer-list))
@@ -224,10 +198,10 @@
       (setq fun (key-binding key))
       (setq last-command-event (aref key (1- (length key))))
       (cond
-       ((equal fun 'select-buffer-forward)
+       ((equal fun 'galen-func/select-buffer-forward)
         (sb-buffer-forward buffer-list)
         (sb-disp-buf-list-with-switch buffer-list))
-       ((equal fun 'select-buffer-backward)
+       ((equal fun 'galen-func/select-buffer-backward)
         (sb-buffer-backword buffer-list)
         (sb-disp-buf-list-with-switch buffer-list))
        ((equal fun 'keyboard-quit)
@@ -248,15 +222,15 @@
     (sb-update)
     (sb-toggle-timer sb-keep-buffer)))
 
-(defun select-buffer-forward ()
+(defun galen-func/select-buffer-forward ()
   "向前选择buffer"
   (interactive)
-  (select-buffer))
+  (galen-func/select-buffer))
 
-(defun select-buffer-backward ()
+(defun galen-func/select-buffer-backward ()
   "向后选择buffer"
   (interactive)
-  (select-buffer t))
+  (galen-func/select-buffer t))
 
 (defun sb-toggle-keep-buffer ()
   "toggle `sb-keep-buffer'"
@@ -272,7 +246,7 @@
 (defun sb-update ()
   (if sb-keep-buffer (sb-update-buffer)))
 
-(defun switch-to-other-buffer ()
+(defun galen-func/switch-to-other-buffer ()
   "切换到最近访问的buffer"
   (interactive)
   (unless (minibufferp)
@@ -284,7 +258,7 @@
 ;; TODO: 怎样可以不要以下的小patch
 (require 'ediff)
 
-(defvar sb-state-ediff nil "select-buffer的状态")
+(defvar sb-state-ediff nil "galen-func/select-buffer的状态")
 
 (add-hook 'ediff-startup-hook
           '(lambda ()
@@ -295,7 +269,7 @@
 (defvar command-with-sb
   '(kill-buffer
     kill-this-buffer
-    switch-to-other-buffer
+    galen-func/switch-to-other-buffer
     ido-switch-buffer
     find-file
     ido-find-file
@@ -382,4 +356,4 @@
     "svn-revert-current-file"
     "svn-update-current-file"))
 
-(provide 'select-buffer)
+(provide 'galen-select-buffer)

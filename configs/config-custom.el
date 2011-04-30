@@ -27,9 +27,13 @@
  '(global-hl-line-mode nil)
 ; '(global-semantic-tag-folding-mode t nil (semantic-util-modes))
 ;;; '(gud-tooltip-mode t)
- '(indent-tabs-mode t)
+; '(indent-tabs-mode t)
+; '(tab-width 8)
  '(inhibit-startup-screen t)
 ; '(initial-scratch-message "")
+
+ ;; 用一个很大的kill ring. 这样防止我不小心删掉重要的东西
+ '(kill-ring-max 200)
 
 
  '(line-number-mode t)
@@ -49,7 +53,7 @@
  '(uniquify-buffer-name-style (quote forward))
  '(use-dialog-box nil)
  '(visible-bell t)
- '(tab-width 8)
+
  '(make-backup-files nil)
 ;; 个人信息
  '(user-mail-address "galen.gang.liu@gmail.com")
@@ -60,7 +64,8 @@
 
 ;; 防止页面滚动时跳动,scroll-margin 3可以在靠近屏幕边沿3行时就开始滚动,可以很好的看到上下文
 ; '(scroll-margin 3); info mode have problem
- '(scroll-conservatively 10000)
+ ;; C-n 等操作有问题，
+; '(scroll-conservatively 10000)
 
 ;; 没有提示音,也不闪屏
  '(ring-bell-function 'ignore)

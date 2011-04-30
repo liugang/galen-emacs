@@ -14,7 +14,7 @@
      perl-mode-hook)
    'galen-func/highlight-symbol-mode-on))
 
-(defun highlight-symbol-settings ()
+(defun galen-func/highlight-symbol-settings ()
   "Settings for `highlight-symbol'."
 
   (setq highlight-symbol-idle-delay 0.5)
@@ -31,8 +31,9 @@
 ;;;###autoload
   (define-globalized-minor-mode global-highlight-symbol-mode highlight-symbol-mode galen-func/highlight-symbol-mode-on)
 
+  ;; highlight-line 后看不到当前行的颜色
 ;;;###autoload
-  (defun galen-func/highlight-symbol-jump (dir)
+  (defun highlight-symbol-jump (dir)    ; 覆盖默认的定义
     "Jump to the next or previous occurence of the symbol at point.
 DIR has to be 1 or -1."
     (let ((symbol (highlight-symbol-get-symbol)))
@@ -40,7 +41,7 @@ DIR has to be 1 or -1."
           (let* ((case-fold-search nil)
                  (bounds (bounds-of-thing-at-point 'symbol))
                  (offset (- (point) (if (< 0 dir) (cdr bounds) (car bounds)))))
-            (unless (eq last-command 'galen-func/highlight-symbol-jump)
+            (unless (eq last-command 'highlight-symbol-jump)
               (push-mark))
             (let ((target
                    (save-excursion
@@ -50,7 +51,7 @@ DIR has to be 1 or -1."
               (if target
                   (goto-char (+ target offset))
                 (message (format "Reach %s" (if (> dir 0) "bottom" "top"))))
-              (setq this-command 'galen-func/highlight-symbol-jump)))
+              (setq this-command 'highlight-symbol-jump)))
         (error "No symbol at point"))))
 
   ;; I bind "C-x w" to `copy-sexp'
@@ -77,6 +78,6 @@ DIR has to be 1 or -1."
 (global-set-key [(shift f3)] 'highlight-symbol-prev)
 
 (eval-after-load "highlight-symbol"
-  '(highlight-symbol-settings))
+  '(galen-func/highlight-symbol-settings))
 
 (provide 'galen-highlight-symbol-settings)

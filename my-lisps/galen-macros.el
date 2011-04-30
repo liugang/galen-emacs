@@ -68,4 +68,20 @@ See also `with-temp-buffer'."
        (interactive)
        (funcall ',(intern command) ,(if is-on 1 -1)))))
 
+;;;###autoload
+(defmacro galen-macro/def-redo-command (fun-name redo undo)
+  "Make redo command."
+  `(defun ,fun-name ()
+     (interactive)
+
+     (if (equal last-command ,redo)
+         (setq last-command 'undo)      ; 如果执行了redo, 设置上次命令为,redo，再次执行'undo时，就是undo的效果
+       (setq last-command nil))         ; 如果执行了undo, 设置上次命令为空，再次执行'undo时，就是redo的效果
+
+     (call-interactively ,undo)
+
+     (setq this-command ,redo)
+     )
+  )
+
 (provide 'galen-macros)

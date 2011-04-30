@@ -1,7 +1,7 @@
 ;; Copyright (C) 2010 ahei
 
-;; Author: ahei <ahei0802@gmail.com>
-;; URL: http://code.google.com/p/dea/source/browse/trunk/my-lisps/(>>>FILE<<<)
+;; Author: Galen <galen.gang.liu@gmail.com>
+;; URL: (>>>FILE<<<)
 ;; Time-stamp: <2010-04-09 10:59:01 Friday by ahei>
 
 ;; This  file is free  software; you  can redistribute  it and/or

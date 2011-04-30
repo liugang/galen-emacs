@@ -1,23 +1,4 @@
-;; Copyright (C) 2010 ahei
-
-;; Author: ahei <ahei0802@gmail.com>
-;; URL: http://code.google.com/p/dea/source/browse/trunk/my-lisps/dired-settings.el
-;; Time-stamp: <2010-11-21 21:15:20 Sunday by taoshanwen>
-
-;; This  file is free  software; you  can redistribute  it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by  the Free Software Foundation;  either version 3,
-;; or (at your option) any later version.
-
-;; This file is  distributed in the hope that  it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR  A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You  should have  received a  copy of  the GNU  General Public
-;; License along with  GNU Emacs; see the file  COPYING.  If not,
-;; write  to  the Free  Software  Foundation,  Inc., 51  Franklin
-;; Street, Fifth Floor, Boston, MA 02110-1301, USA.
+(require 'dired-x)
 
 (eal-define-keys-commonly
  global-map
@@ -26,10 +7,12 @@
 (add-hook 'dired-after-readin-hook 'his-dired-sort)
 (add-hook 'dired-lood-hook 'his-dired-sort)
 
-(defun dired-settings ()
+(defun galen-func/dired-settings ()
   "Settings for `dired'."
 
-  (setq truncate-lines t)
+  ;; do not display continuation lines.
+  ;; Instead, give each line of text just one screen line.
+;  (setq truncate-lines t)
 
   (require 'wuxch-dired "my-wuxch-dired")
   (require 'wuxch-dired-copy-paste "my-wuxch-dired-copy-paste")
@@ -37,8 +20,10 @@
   (require 'dired-details+)
   (setq dired-details-initially-hide nil)
 
-  (require 'dired+-settings)
-  (require 'dired-x-settings)
+  (require 'dired+)
+  (require 'galen-dired-x-settings)
+
+  ;; dired letter isearch
   (require 'dired-lis-settings)
 
   ;; dired中用T就把一个目录压缩为一个.tar.gz文件
@@ -46,11 +31,11 @@
 
   ;; wdired提供修改文件名的一种非常方便方法。它把dired-mode当作一般的
   ;; 文本处理，这样无论是修改一个文件，还是批量修改文件都不是一般的爽。
-  (if is-before-emacs-21 (require 'wdired "wdired-for-21"))
+;  (if is-before-emacs-21 (require 'wdired "wdired-for-21"))
 
   ;; 让你能够在dired-mode里面使用只对文件名部分执行i-search
   (require 'dired-isearch "my-dired-isearch")
-  
+
   (defun his-dired-sort ()
     "dired-mode中让目录显示在文件前"
     (save-excursion
@@ -95,7 +80,7 @@ See also `dired-scroll-half-page-backward'."
     (interactive)
     (call-interactively 'View-scroll-half-page-forward)
     (dired-move-to-filename))
-  
+
   (defun dired-scroll-up ()
     "Scroll up in dired-mode.
 See also `dired-scroll-down'."
@@ -109,7 +94,7 @@ See also `dired-scroll-down'."
     (interactive)
     (call-interactively 'scroll-down)
     (dired-move-to-filename))
-  
+
   (defun ywb-dired-filter-regexp (regexp &optional arg)
     "dired mode中只显示后缀名符合正则表达式的文件和目录"
     (interactive
@@ -201,6 +186,7 @@ which is options for `diff'."
      `(
       ;("C-h"         dired-up-directory-same-buffer)
        ("<backspace>" dired-up-directory-same-buffer)
+       ("^" dired-up-directory-same-buffer)
        ("'"           switch-to-other-buffer)
        ("/"           dired-slash-map)
        ("/m"          ywb-dired-filter-regexp)
@@ -214,13 +200,14 @@ which is options for `diff'."
        ;; 让dired只使用一个buffer
        ("RET"         dired-lis-find-file-reuse-dir-buffer)
        ("<return>"    dired-lis-find-file-reuse-dir-buffer)
-       ("M"           wuxch-mark-all-files-directories)
-       ("g"           revert-buffer)
+       ;; ("M"           wuxch-mark-all-files-directories)
+;       ("g"           revert-buffer)
+       ("g"           wuxch-dired-revert)
        ("M-o"         dired-omit-mode)
        ("M-Y"         dired-redo)
        ("C-k"         dired-do-delete)
        ("M-s"         dired-lis-off)
-       ("M-q"           dired-lis-on)
+       ("M-q"         dired-lis-on)
        ("M"           dired-unmark)
 
        ("1"           delete-other-windows)
@@ -230,8 +217,9 @@ which is options for `diff'."
 
        ("j"           wuxch-dired-next-line)
        ("k"           wuxch-dired-previous-line)
+
        ("SPC"         dired-scroll-half-page-forward)
-       ("u"           dired-scroll-half-page-backward)
+;       ("u"           dired-scroll-half-page-backward)
        ("d"           dired-scroll-up)
        ("w"           dired-scroll-down)
        ("M->"         wuxch-dired-goto-last-line)
@@ -246,7 +234,8 @@ which is options for `diff'."
        ("t"           sb-toggle-keep-buffer)
        ("M-m"         dired-unmark-backward)
        ("C-c M-m"     dired-create-directory)
-       
+;C-c +           wuxch-dired-create-directory
+
        ("C-c C-m"     make-sb)
        ("C-c m"       make-check-sb)
        ("C-c M"       make-clean-sb)
@@ -264,9 +253,10 @@ which is options for `diff'."
 
   (add-hook 'dired-mode-hook 'dired-mode-hook-settings)
 
-  (def-redo-command dired-redo 'dired-redo 'dired-undo))
+  ;; 定义dired-redo命令
+  (galen-macro/def-redo-command dired-redo 'dired-redo 'dired-undo))
 
 (eval-after-load "dired"
-  `(dired-settings))
+  `(galen-func/dired-settings))
 
-(provide 'dired-settings)
+(provide 'galen-dired-settings)

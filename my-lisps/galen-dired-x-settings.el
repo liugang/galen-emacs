@@ -13,19 +13,22 @@ Uninteresting files are those whose filenames match regexp `dired-omit-files',
 plus those ending with extensions in `dired-omit-extensions'."
   t)
 
-(am-add-hooks
+(galen-func/add-hooks
  `(dired-mode-hook)
  'dired-omit-mode)
 
-(defun dired-x-settings ()
+(defun galen-func/dired-x-settings ()
   "Settings for `dired-x'."
-  (unless is-before-emacs-21
+  (unless galen-const/is-before-emacs-21
     (setq dired-omit-files (concat dired-omit-files "\\|^\\.\\|^semantic.cache$\\|^CVS$"))
-    (if mswin
-        (setq dired-omit-files (concat dired-omit-files "\\|^_"))))
-  (setq dired-omit-size-limit 1000000))
+    (if galen-var/mswin
+        (setq dired-omit-files (concat dired-omit-files "\\|^_")))
+    )
+
+  (setq dired-omit-size-limit 1000000)
+  )
 
 (eval-after-load "dired-x"
-  `(dired-x-settings))
+  `(galen-func/dired-x-settings))
 
-(provide 'dired-x-settings)
+(provide 'galen-dired-x-settings)

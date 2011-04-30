@@ -547,16 +547,18 @@ else open the current directory.06/11/2007 10:54:28 wuxch"
 
   (setq-default static-wuxch-first-line-of-buffer (wuxch-get-first-line-of-dired-by-search-double-dot))
   (make-local-variable 'static-wuxch-first-line-of-buffer)
+
   (setq-default static-wuxch-max-line-of-buffer (wuxch-dired-max-line-by-count))
   (make-local-variable 'static-wuxch-max-line-of-buffer)
   )
 
-(defun wuxch-dired-revert ()
+(defun wuxch-dired-revert (arg)
   ""
+  (interactive "p")
   (revert-buffer)
   (update-dired-static-variables)
-  (goto-line (wuxch-get-first-line-of-dired))
-  (dired-move-to-filename)
+;  (goto-line (wuxch-get-first-line-of-dired))
+;  (dired-move-to-filename)
   )
 
 (defun wuxch-dired-revert-and-goto-marked-file (arg)
@@ -595,13 +597,15 @@ else open the current directory.06/11/2007 10:54:28 wuxch"
 
 (defun wuxch-get-first-line-of-dired-by-search-double-dot ()
   ""
-  (goto-char (point-min))
-  (if (search-forward ".." nil t)
-      ;; 找到了。此时光标所在的第一行就是..的下一行
+  ;; 获取行号后，应该返回原点
+  (save-excursion
+    (goto-char (point-min))
+    (if (search-forward ".." nil t)
+        ;; 找到了。此时光标所在的第一行就是..的下一行
+        (+ (line-number-at-pos) 1)
+      ;; 没有找到 ..，测试光标所在的第一行是第二行
       (+ (line-number-at-pos) 1)
-    ;; 没有找到 ..，测试光标所在的第一行是第二行
-    (+ (line-number-at-pos) 1)
-    )
+      ))
   )
 
 (defun wuxch-dired-next-line (arg)

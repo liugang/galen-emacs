@@ -40,7 +40,7 @@
 
 ;(semantic-mode 1) ;使用eassist之前，必须打开semantic-mode
 ;; 自带的不能产生elisp函数列表
-
+(require 'galen-cedet-settings)
 (require 'galen-eassist-settings)
 
 ;; `mode-line'显示格式
@@ -67,12 +67,8 @@
 (require 'galen-highlight-parentheses-settings)
 
 
-(require 'galen-cedet-settings)
-
 ;; 用来显示当前光标在哪个函数
 (require 'galen-which-func-settings)
-
-
 
 
 ;; ;; ecb 代码浏览器
@@ -188,26 +184,23 @@
 
 ;; ;; edit-settings中对M-w重新定义,但是kde-emacs中也对其定义了
 ;; ;; 所以必须要放在kde-emacs后面
-;; (require 'edit-settings)
 
-;; ;; 用M-x执行某个命令的时候，在输入的同时给出可选的命令名提示
-;; (require 'icomplete-settings)
+(require 'galen-compile-settings)
 
-;; ;; minibuffer中输入部分命令就可以使用补全
-;; (unless is-after-emacs-23
-;;   (partial-completion-mode 1))
+(require 'galen-edit-settings)
 
-;; ;; 图片mode
-;; (require 'image-mode-settings)
+;; 用M-x执行某个命令的时候，在输入的同时给出可选的命令名提示
+(require 'galen-icomplete-settings)
 
-;; ;; 用一个很大的kill ring. 这样防止我不小心删掉重要的东西
-;; (setq kill-ring-max 200)
+;; 图片mode
+(require 'galen-image-mode-settings)
+
 
 ;; ;; 方便的在kill-ring里寻找需要的东西
 ;; (require 'browse-kill-ring-settings)
 
-;; ;; 显示行号
-;; (require 'linum-settings)
+;; 显示行号
+(require 'galen-linum-settings)
 
 ;; ;; color theme Emacs主题
 ;; (require 'color-theme-settings)
@@ -216,11 +209,8 @@
 ;; (require 'color-theme-ahei)
 ;; (require 'face-settings)
 
-;; ;; 高亮当前行
-;; (require 'hl-line-settings)
-
-;; ;; 字体配置
-;; (require 'font-settings)
+;; 高亮当前行
+(require 'galen-hl-line-settings)
 
 ;; ;; diff
 ;; (require 'diff-settings)
@@ -266,15 +256,15 @@
 ;; (setq-default abbrev-mode t)
 ;; (setq save-abbrevs nil)
 
-;; ;; 可以为重名的buffer在前面加上其父目录的名字来让buffer的名字区分开来，而不是单纯的加一个没有太多意义的序号
-;; (require 'uniquify)
-;; (setq uniquify-buffer-name-style 'forward)
+;; 可以为重名的buffer在前面加上其父目录的名字来让buffer的名字区分开来，而不是单纯的加一个没有太多意义的序号
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
 
 ;; ;; 以目录形式显示linkd文档
 ;; ;; (require 'linkd-settings)
 
-;; ;; Emacs的超强文件管理器
-;; (require 'dired-settings)
+;; Emacs的超强文件管理器
+(require 'galen-dired-settings)
 
 ;; ;; 方便的切换major mode
 ;; (defvar switch-major-mode-last-mode nil)

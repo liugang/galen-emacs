@@ -6,7 +6,8 @@
    emacs-lisp-mode-map
    python-mode-map
    )
- `(("C-9" eassist-list-methods)))
+ `(("C-9" eassist-list-methods)
+   ("C-8" eassist-switch-h-cpp)))
 
 (defun galen-func/eassist-settings()
   "Setting for `eassist'."
