@@ -1,22 +1,16 @@
-;; -*- Emacs-Lisp -*-
-
-;; Time-stamp: <2011-01-16 15:32:19 Sunday by taoshanwen>
-
-(require 'util)
-
 (define-key global-map (kbd "C-x H") 'goto-help-buffer)
 
-(defun help-mode-settings ()
+(defun galen-func/help-mode-settings ()
   "settings of `help-mode'."
   (eal-define-keys
    'help-mode-map
    `(("B"   help-go-back)
      ("F"   help-go-forward)
-     ("f"   am-forward-word-or-to-word)
+     ;; ("f"   am-forward-word-or-to-word)
      ("d"   scroll-up)
      ("w"   scroll-down)
      ("v"   set-mark-command)
-     ("C-h" help-go-back)
+     ;; ("C-h" help-go-back)
      ("C-;" help-go-forward)
      ("n"   forward-button)
      ("p"   backward-button)
@@ -35,10 +29,10 @@
           (switch-to-buffer buffer)
         (message "*Help* buffer dose not exist!"))))
 
-  (def-turn-on "view-mode" nil)
-  (am-add-hooks 'help-mode-hook 'view-mode-off))
+  (galen-macro/def-turn-on "view-mode" nil)
+  (galen-func/add-hooks 'help-mode-hook 'view-mode-off))
 
 (eval-after-load "help-mode"
-  `(help-mode-settings))
+  `(galen-func/help-mode-settings))
 
-(provide 'help-mode-settings)
+(provide 'galen-help-mode-settings)

@@ -204,7 +204,8 @@
  global-map
  `(("C-M-]" galen-func/ywb-indent-accoding-to-paren)
    ("C-x f" ido-find-file)
+   ;; exchange the two keys
+   ("C-o" other-window)
+   ("C-x o" open-line)
    ))
-
-
 

@@ -248,10 +248,15 @@
 ;; ;;(require 'ascii)
 
 ;; ;; 所有关于查看帮助方面的配置
-;; (require 'all-help-settings)
-
-;; ;; 定义一些emacs 21没有的函数
-;; (if is-before-emacs-21 (require 'for-emacs-21))
+(require 'galen-help-mode-settings)
+;; Emacs中的info
+(require 'galen-info-settings)
+;; Emacs中的man配置
+(require 'galen-man-settings)
+;; 非常方便的查看emacs帮助的插件
+;(require 'describe-symbol)
+;(require 'find-symbol)
+;(require 'describe-find-symbol-settings)
 
 ;; ;; 简写模式
 ;; (setq-default abbrev-mode t)
@@ -345,7 +350,7 @@
 ;;    ("C-x L" (lambda () (interactive) (count-brf-lines t)))))
 
 ;; ;; 增加更丰富的高亮
-;; (require 'generic-x)
+(require 'generic-x)
 
 ;; (defun switch-to-scratch ()
 ;;   "切换到*scratch*"
@@ -363,7 +368,7 @@
 ;; (global-set-key (kbd "C-x E") 'visit-.emacs)
 
 ;; ;; grep
-;; (require 'grep-settings)
+(require 'galen-grep-settings)
 
 ;; ;; ack-grep, grep纯perl的代替品
 ;; (require 'full-ack-settings)

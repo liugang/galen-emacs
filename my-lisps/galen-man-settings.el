@@ -1,7 +1,3 @@
-;; -*- Emacs-Lisp -*-
-
-;; Time-stamp: <2010-09-12 11:33:24 Sunday by taoshanwen>
-
 (define-key global-map (kbd "C-x M") 'woman)
 
 (eal-define-keys
@@ -27,22 +23,23 @@
    ("g"       emaci-g)
    ("'"     switch-to-other-buffer)))
 
-(defun man-settings ()
+(defun galen-func/man-settings ()
   "settings for `man'.")
 
 (eal-define-keys
-  `(c-mode-base-map sh-mode-map)
-  `(("C-c /" man-current-word)))
+  `(c-mode-base-map
+    sh-mode-map)
+  `(("C-c /" galen-func/man-current-word)))
 
 ;;;###autoload
-(defun man-current-word ()
-  "查看当前光标所在的词的`man'"
+(defun galen-func/man-current-word ()
+  "鏌ョ湅褰撳墠鍏夋爣鎵�鍦ㄧ殑璇嶇殑`man'"
   (interactive)
   (manual-entry (current-word)))
 
 (eval-after-load "man"
-  '(man-settings))
+  '(galen-func/man-settings))
 
-(require 'woman-settings)
+(require 'galen-woman-settings)
 
-(provide 'man-settings)
+(provide 'galen-man-settings)

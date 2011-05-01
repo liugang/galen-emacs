@@ -1,8 +1,4 @@
-;; -*- Emacs-Lisp -*-
-
-;; Time-stamp: <2010-12-26 20:41:26 Sunday by taoshanwen>
-
-(defun woman-settings ()
+(defun galen-func/woman-settings ()
   "Settings for `woman-mode'."
   (setq woman-use-own-frame nil)
   (setq woman-fill-column 100)
@@ -11,7 +7,7 @@
     "Settings for `woman-mode'."
     (setq truncate-lines nil))
 
-  (am-add-hooks 'woman-mode-hook 'woman-mode-hook-settings)
+  (galen-func/add-hooks 'woman-mode-hook 'woman-mode-hook-settings)
   ;; 只增加英文的man路径
   (setq woman-manpath
         (or (woman-parse-colon-path (getenv "MANPATH"))
@@ -24,6 +20,6 @@
    ("v"     set-mark-command)))
 
 (eval-after-load "woman"
-  '(woman-settings))
+  '(galen-func/woman-settings))
 
-(provide 'woman-settings)
+(provide 'galen-woman-settings)

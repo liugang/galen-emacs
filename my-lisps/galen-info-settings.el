@@ -1,16 +1,10 @@
-;; -*- Emacs-Lisp -*-
+;; (eal-define-keys-commonly
+;;  global-map
+;;  `(("C-x I" info-max-window)))
 
-;; Time-stamp: <2011-01-03 21:11:21 Monday by taoshanwen>
-
-(require 'util)
-
-(eal-define-keys-commonly
- global-map
- `(("C-x I" info-max-window)))
-
-(apply-args-list-to-fun
- 'def-command-max-window
- `("info"))
+;; (galen-func/apply-args-list-to-fun
+;;  'def-command-max-window
+;;  `("info"))
 
 (eal-define-keys
  'Info-mode-map
@@ -40,11 +34,11 @@
 
 (add-hook 'info-mode-hook 'turn-on-iimage-mode)
 
-(defun info-settings ()
+(defun galen-func/info-settings ()
   "settings for `info'."
   (require 'info+))
 
 (eval-after-load "info"
-  `(info-settings))
+  `(galen-func/info-settings))
 
-(provide 'info-settings)
+(provide 'galen-info-settings)

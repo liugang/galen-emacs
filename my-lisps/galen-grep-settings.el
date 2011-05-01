@@ -2,14 +2,14 @@
 
 ;; Time-stamp: <2010-12-01 19:27:22 Wednesday by taoshanwen>
 
-(unless is-before-emacs-21
+(unless galen-const/is-before-emacs-21
   (eal-define-keys-commonly
    global-map
-   `(("C-x F"   find-grep-in-current-dir)
-     ("C-x f"   find-grep-in-dir)
+   `(("C-x g"   find-grep-in-current-dir)
+     ("C-x G"   find-grep-in-dir)
      ("C-x M-f" find-grep-current-word-in-current-dir)
-     ("C-x M-F" find-grep-current-word)))
-  
+     ("C-x M-F" find-grep-current-word-in-dir)))
+
   (eal-define-keys
    'grep-mode-map
    `(("q"     bury-buffer)
@@ -46,10 +46,11 @@ SYMBOL should be one of `grep-command', `grep-template',
 ;;;###autoload
 (defun find-grep-in-current-dir (dir)
   "Run `find-grep' in current directory."
+  (interactive "P")
   (find-grep-in-dir default-directory))
 
 ;;;###autoload
-(defun find-grep-current-word (dir &optional is-prompt)
+(defun find-grep-current-word-in-dir (dir &optional is-prompt)
   "Run `grep' to find current word in directory DIR."
   (interactive
    (list
@@ -71,7 +72,7 @@ SYMBOL should be one of `grep-command', `grep-template',
 (defun find-grep-current-word-in-current-dir (&optional is-prompt)
   "Run `grep' to find current word in directory DIR."
   (interactive "P")
-  (find-grep-current-word default-directory is-prompt))
+  (find-grep-current-word-in-dir default-directory is-prompt))
 
 (defvar grep-find-prompt
   "find . -type f ! -path \"*/.svn*\" ! -path \"*~\" -print0 | xargs -0 -e grep -nH -e "
@@ -80,7 +81,7 @@ SYMBOL should be one of `grep-command', `grep-template',
 ;;;###autoload
 (defun set-grep-command (command)
   "Set `grep-command'."
-  (if is-after-emacs-23
+  (if galen-const/is-after-emacs-23
       (grep-apply-setting 'grep-find-command command)
     (setq grep-find-command command)))
 
@@ -89,18 +90,18 @@ SYMBOL should be one of `grep-command', `grep-template',
   (set-grep-command grep-find-prompt))
 
 ;;;###autoload
-(defun grep-settings ()
+(defun galen-func/grep-settings ()
   "settings for `grep'."
   (set-default-grep-command)
 
   (defvar grep-ignore-case nil "When run `grep' ignore case or not.")
 
   (when grep-ignore-case
-    (if is-after-emacs-23
+    (if galen-const/is-after-emacs-23
         (grep-apply-setting 'grep-command "grep -inH -e ")
       (setq grep-command "grep -inH -e "))))
 
 (eval-after-load "grep"
-  `(grep-settings))
+  `(galen-func/grep-settings))
 
-(provide 'grep-settings)
+(provide 'galen-grep-settings)
