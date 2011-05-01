@@ -210,6 +210,7 @@
 ;; (require 'color-theme-ahei)
 ;; (require 'face-settings)
 
+(require 'galen-face-settings)
 ;; 高亮当前行
 (require 'galen-hl-line-settings)
 
