@@ -27,7 +27,7 @@
  '(global-hl-line-mode nil)
 ; '(global-semantic-tag-folding-mode t nil (semantic-util-modes))
 ;;; '(gud-tooltip-mode t)
-; '(indent-tabs-mode t)
+ '(indent-tabs-mode t)
 ; '(tab-width 8)
  '(inhibit-startup-screen t)
 ; '(initial-scratch-message "")
@@ -124,6 +124,7 @@
 (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
 (add-hook 'before-save-hook 'galen-func/trailing-whitespace-hook)
 (add-hook 'before-save-hook 'galen-func/untabify-hook)
+(add-hook 'before-save-hook 'galen-func/tabify-hook)
 
 ;(setq-default default-directory "~")
 

@@ -127,6 +127,8 @@
 ;; ;; 方便开发c/c++的配置
 (require 'galen-c-settings)
 
+(require 'kde-emacs-settings)
+
 ;; ;; 放在kde-emacs后面
 ;; (require 'compile-settings)
 

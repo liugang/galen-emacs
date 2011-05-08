@@ -202,6 +202,11 @@ is at next line, then rollback and excute `forward-word'"
     (untabify (point-min) (point-max))))
 
 ;;;###autoload
+(defun galen-func/tabify-hook ()
+  (when (member major-mode galen-var/tabify-modes)
+    (tabify (point-min) (point-max))))
+
+;;;###autoload
 (defun galen-func/revert-buffer-with-coding-system-no-confirm (coding-system)
   "Call `revert-buffer-with-coding-system', but when `revert-buffer' do not need confirm."
   (interactive "zCoding system for visited file (default nil): ")

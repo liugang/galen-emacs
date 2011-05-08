@@ -57,7 +57,7 @@
 ; C-x r m    to set a named bookmark in the buffer
 ; C-x r b    to jump to a named bookmark in the buffer
 ; To save bookmarks to a file type:
-; M-x bookmark-write 
+; M-x bookmark-write
 ; and to load bookmarks from a file write:
 ; M-x bookmark-load
 
@@ -71,90 +71,90 @@
   (require 'kde-emacs-doc))
 
 ;; Wheelmouse support
-(define-key global-map [(button4)] 'scroll-me-down)
-(define-key global-map [(button5)] 'scroll-me-up)
-(define-key global-map [(shift button4)] 'scroll-me-down-a-bit)
-(define-key global-map [(shift button5)] 'scroll-me-up-a-bit)
+;; ;; (define-key global-map [(button4)] 'scroll-me-down)
+;; ;; (define-key global-map [(button5)] 'scroll-me-up)
+;; ;; (define-key global-map [(shift button4)] 'scroll-me-down-a-bit)
+;; ;; (define-key global-map [(shift button5)] 'scroll-me-up-a-bit)
 
 ;; Some example bindings, feel free to customize :)
 (define-key global-map [(meta up)] 'scroll-other-up)
 (define-key global-map [(meta down)] 'scroll-other-down)
-(define-key global-map [(control j)] 'goto-line)
-(global-set-key [(control %)] 'match-paren) ;;for all buffers :)
+;; ;; (define-key global-map [(control j)] 'goto-line)
+;; ;; (global-set-key [(control %)] 'match-paren) ;;for all buffers :)
 
-(if (featurep 'igrep)
-    (progn
-      (setq igrep-find-prune-clause
-	    (format "-type d %s -name CVS -o -name .libs -o -name .deps -o -name .svn %s"
-		    (shell-quote-argument "(")
-		    (shell-quote-argument ")")))
-      (setq igrep-find-file-clause
-	    (format "-type f %s -name %s %s -name %s %s -name %s %s -name %s" ; -type l
-		    (shell-quote-argument "!")
-		    (shell-quote-argument "*~")	; Emacs backup
-		    (shell-quote-argument "!")
-		    (shell-quote-argument "*,v") ; RCS file
-		    (shell-quote-argument "!")
-		    (shell-quote-argument "s.*") ; SCCS file
-		    (shell-quote-argument "!")
-		    (shell-quote-argument "*.o") ; compiled object
-		    (shell-quote-argument "!")
-		    (shell-quote-argument ".#*") ; Emacs temp file
-		    )
-	    )
-      (define-key global-map [(f2)] 'igrep)
-      (define-key global-map [(shift f2)] 'igrep-find)
-      (define-key global-map [(f12)] 'igrep-find)  ; on the console, shift f2 gives f12 for some reason..
-      ;(setq igrep-files-default 'ignore) ; too hard to use *.cc *.h with it, because of the full path
-      )
-  (define-key global-map [(f2)] 'grep))
-(define-key global-map [(shift backspace)] 'kde-delete-backward-ws)
+;; (if (featurep 'igrep)
+;;     (progn
+;;       (setq igrep-find-prune-clause
+;;             (format "-type d %s -name CVS -o -name .libs -o -name .deps -o -name .svn %s"
+;;                     (shell-quote-argument "(")
+;;                     (shell-quote-argument ")")))
+;;       (setq igrep-find-file-clause
+;;             (format "-type f %s -name %s %s -name %s %s -name %s %s -name %s" ; -type l
+;;                     (shell-quote-argument "!")
+;;                     (shell-quote-argument "*~") ; Emacs backup
+;;                     (shell-quote-argument "!")
+;;                     (shell-quote-argument "*,v") ; RCS file
+;;                     (shell-quote-argument "!")
+;;                     (shell-quote-argument "s.*") ; SCCS file
+;;                     (shell-quote-argument "!")
+;;                     (shell-quote-argument "*.o") ; compiled object
+;;                     (shell-quote-argument "!")
+;;                     (shell-quote-argument ".#*") ; Emacs temp file
+;;                     )
+;;             )
+;;       (define-key global-map [(f2)] 'igrep)
+;;       (define-key global-map [(shift f2)] 'igrep-find)
+;;       (define-key global-map [(f12)] 'igrep-find)  ; on the console, shift f2 gives f12 for some reason..
+;;       ;(setq igrep-files-default 'ignore) ; too hard to use *.cc *.h with it, because of the full path
+;;       )
+;;   (define-key global-map [(f2)] 'grep))
+;; (define-key global-map [(shift backspace)] 'kde-delete-backward-ws)
 
 ;; FIXME: remember to get these working on Gnu/Emacs (Zack)
-(when (eq kde-emacs-type 'xemacs)
-  (define-key c++-mode-map [(f8)] 'function-menu)
-  (define-key c++-mode-map [(f3)] 'fume-prompt-function-goto)
-  (define-key c++-mode-map [(shift f3)] 'fume-list-functions)
-  )
+;; (when (eq kde-emacs-type 'xemacs)
+;;   (define-key c++-mode-map [(f8)] 'function-menu)
+;;   (define-key c++-mode-map [(f3)] 'fume-prompt-function-goto)
+;;   (define-key c++-mode-map [(shift f3)] 'fume-list-functions)
+;;   )
 
-(define-key global-map [(shift button3)] 'mouse-function-menu)
+;; (define-key global-map [(shift button3)] 'mouse-function-menu)
 (define-key global-map [(shift f4)] 'makeclean)
 (define-key global-map [(f4)] 'make)
 (define-key global-map [(f5)] 'makeinstall)
-(define-key global-map [(shift f5)] 'makeinstallexec) ; TODO replace with run-current-program
+;; (define-key global-map [(shift f5)] 'makeinstallexec) ; TODO replace with run-current-program
 (define-key global-map [(shift f6)] 'makethisfile)
-(if kde-emacs-newline-semicolon 
+(if kde-emacs-newline-semicolon
     (define-key c++-mode-map "\;" 'insert-semicolon))
-(define-key c++-mode-map [(f6)] 'kde-switch-cpp-h)
-(define-key c-mode-map [(f6)] 'kde-switch-cpp-h)
-(define-key c++-mode-map [(f7)] 'switch-to-function-def)
-(define-key c-mode-map [(f7)] 'switch-to-function-def)
+;; (define-key c++-mode-map [(f6)] 'kde-switch-cpp-h)
+;; (define-key c-mode-map [(f6)] 'kde-switch-cpp-h)
+;; (define-key c++-mode-map [(f7)] 'switch-to-function-def)
+;; (define-key c-mode-map [(f7)] 'switch-to-function-def)
 (define-key c++-mode-map [(f9)] 'agulbra-make-member)
 (define-key c-mode-map [(f9)] 'agulbra-make-member)
 (define-key global-map [(meta n)] 'next-error)
 
 ; kde-emacs-headers:
-(define-key c++-mode-map [(f10)] 'kdab-insert-header)
-(define-key c++-mode-map [(shift f10)] 'kdab-insert-forward-decl)
-(define-key c++-mode-map [(meta f10)] 'kdab-lookup-qt-documentation)
-(define-key c++-mode-map [(control meta d)] 'insert-kDebug)
+;; (define-key c++-mode-map [(f10)] 'kdab-insert-header)
+;; (define-key c++-mode-map [(shift f10)] 'kdab-insert-forward-decl)
+;; (define-key c++-mode-map [(meta f10)] 'kdab-lookup-qt-documentation)
+(define-key c++-mode-map [(control meta d)] 'insert-kDebug) ; used for printf
 
 ; Standard Qt/KDE shortcuts: Ctrl+Backspace, Ctrl+Delete
-(define-key global-map [(control backspace)] 'backward-kill-word)
-(define-key global-map [(control delete)] 'kill-word)
+;; (define-key global-map [(control backspace)] 'backward-kill-word)
+;; (define-key global-map [(control delete)] 'kill-word)
 
 ; Standard Qt/KDE shortcuts: Control Pageup and Pagedown
-(define-key global-map [(control prior)] 'beginning-of-buffer)
-(define-key global-map [(control next)] 'end-of-buffer)
+;; (define-key global-map [(control prior)] 'beginning-of-buffer)
+;; (define-key global-map [(control next)] 'end-of-buffer)
 
 ; kde-emacs-semantic :
 ; no binding for kde-license-insert; call it via M-x
-(when (featurep 'semantic)
-  (define-key c++-mode-map [(control c)(control k)(d)] 'kde-doc-function-insert)
-  (define-key c++-mode-map [(control c)(control k)(m)] 'kde-doc-multiline-insert)
-  (define-key c++-mode-map [(control c)(control k)(o)] 'kde-doc-oneliner-insert)
-  (define-key c++-mode-map [(control c)(control k)(e)] 'kde-function-expand-at-point)
-  (define-key c++-mode-map [(control c)(control k)(s)] 'kde-create-skeletons))
+;; (when (featurep 'semantic)
+;;   (define-key c++-mode-map [(control c)(control k)(d)] 'kde-doc-function-insert)
+;;   (define-key c++-mode-map [(control c)(control k)(m)] 'kde-doc-multiline-insert)
+;;   (define-key c++-mode-map [(control c)(control k)(o)] 'kde-doc-oneliner-insert)
+;;   (define-key c++-mode-map [(control c)(control k)(e)] 'kde-function-expand-at-point)
+;;   (define-key c++-mode-map [(control c)(control k)(s)] 'kde-create-skeletons))
 
 (modify-frame-parameters (selected-frame) '((menu-bar-lines . 2)))
 (define-key c++-mode-map [menu-bar KDE]

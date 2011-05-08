@@ -26,9 +26,9 @@
   "Specifies the current tab behavior. default will expand try to complete
 the symbol at point if at the end of something that looks like an indentifier else
 it will indent the current line if the pointer is at the beginning of the line it will
-be moved to the start of the indention. abbrev-indent behaves like default, but the 
+be moved to the start of the indention. abbrev-indent behaves like default, but the
 cursor isn't moved to the beginning of the indention with tab is pressed when the cursor
-is at the beginning of the line. indent simply indents the line without trying to 
+is at the beginning of the line. indent simply indents the line without trying to
 complete the symbol"
   :group 'kde-devel
   :version "0.1"
@@ -47,16 +47,16 @@ Try to finish the symbol, or indent the line."
   (interactive "*P")
   (cond
    ((and (not (looking-at "[A-Za-z0-9]"))
-         (save-excursion 
+         (save-excursion
            (forward-char -1)
            (looking-at "[A-Za-z0-9:>_\\-\\&\\.(){}\\*\\+/]")))
          (dabbrev-expand arg))
    (t
     (if (eq kde-tab-behavior 'default)
-	(c-indent-command)
+        (c-indent-command)
       (save-excursion
-	(beginning-of-line)
-	(c-indent-command))))))
+        (beginning-of-line)
+        (c-indent-command))))))
 
 (defun agulbra-clean-out-spaces ()
   "Remove spaces at ends of lines."
@@ -70,7 +70,7 @@ Try to finish the symbol, or indent the line."
              (setq count (1+ count))
              (replace-match "" t t))
            (set-buffer-modified-p bmp)
-	   nil
+           nil
            ))))
 
 ; the above used to contain (untabify (point-min) (point-max)) too
@@ -98,25 +98,25 @@ With arg, do it arg times."
       "XEmacs doesn't have font-lock-add-keywords so we provide it."
       (font-lock-set-defaults)
       (if (eq append 'set)
-	  (setq font-lock-keywords keywords)
-	; NOTE: write this function for XEmacs - Zack
-	;(font-lock-remove-keywords nil keywords) ;to avoid duplicates
-	(let ((old (if (eq (car-safe font-lock-keywords) t)
-		       (cdr font-lock-keywords)
-		     font-lock-keywords)))
-	  (setq font-lock-keywords (if append
-				       (append old keywords)
-				     (append keywords old))))))
+          (setq font-lock-keywords keywords)
+        ; NOTE: write this function for XEmacs - Zack
+        ;(font-lock-remove-keywords nil keywords) ;to avoid duplicates
+        (let ((old (if (eq (car-safe font-lock-keywords) t)
+                       (cdr font-lock-keywords)
+                     font-lock-keywords)))
+          (setq font-lock-keywords (if append
+                                       (append old keywords)
+                                     (append keywords old))))))
   )
 
 (c-add-style "kde-c" '("stroustrup"
-		       (c-basic-offset . 8)
-		       (c-offsets-alist
-			(case-label . 8)
-			(access-label . -)
-			(label . 0)
-			(statement-cont . c-lineup-math)
-			)))
+                       (c-basic-offset . 8)
+                       (c-offsets-alist
+                        (case-label . 8)
+                        (access-label . -)
+                        (label . 0)
+                        (statement-cont . c-lineup-math)
+                        )))
 
 ;  ( we use Backquote ( '`' ) instead of "'" because we want
 ;    kde-access-labels to be evaluated... )
@@ -124,18 +124,19 @@ With arg, do it arg times."
   ;;FIXME: 1) fume functions not available on GNU/Emacs
   ;;       2) insert-tab-mode no longer present (free variable)
   ;;       3) c-hangin-commment-under-p no longer present (free variable)
-			 (if (not (eq kde-tab-behavior 'indent))
-			     (c-tab-always-indent . nil))
-					; (insert-tab-mode nil)
-			 (indent-tabs-mode . nil)
-			 (if (eq kde-emacs-type 'xemacs)
-			     (fume-auto-rescan-buffer-p nil))
-			 (c-access-key . ,kde-access-labels)
-			 (c-opt-access-key . ,kde-access-labels)
-					; (c-hanging-comment-under-p nil)
-			 (c-offsets-alist . ((case-label . 0)
-					     (inline-open . 0)))
-			 ))
+                         (if (not (eq kde-tab-behavior 'indent))
+                             (c-tab-always-indent . nil))
+                                        ; (insert-tab-mode nil)
+                         ;(indent-tabs-mode . nil)
+                         (indent-tabs-mode . t)
+                         (if (eq kde-emacs-type 'xemacs)
+                             (fume-auto-rescan-buffer-p nil))
+                         (c-access-key . ,kde-access-labels)
+                         (c-opt-access-key . ,kde-access-labels)
+                                        ; (c-hanging-comment-under-p nil)
+                         (c-offsets-alist . ((case-label . 0)
+                                             (inline-open . 0)))
+                         ))
 
 ;; KDE C++ mode
 ;; Not a "(setq c++-mode-hook ..." because this way we would
@@ -145,8 +146,8 @@ With arg, do it arg times."
   (c-set-style kde-c++-style)
   (define-key c++-mode-map "\C-m" 'c-context-line-break)
   (when (or
-	 (eq kde-tab-behavior 'default)
-	 (eq kde-tab-behavior 'abbrev-indent))
+         (eq kde-tab-behavior 'default)
+         (eq kde-tab-behavior 'abbrev-indent))
     (define-key c++-mode-map "\C-i" 'agulbra-c++-tab))
   (define-key c++-mode-map "\ef" 'c-forward-into-nomenclature)
   (define-key c++-mode-map "\ed" 'agulbra-delete-into-nomenclature)
@@ -162,11 +163,11 @@ With arg, do it arg times."
   ;; to disable the magic keys in C++ mode.
   (and (boundp 'magic-keys-mode) magic-keys-mode
        (progn
-	 (define-key c++-mode-map "\," 'insert-comma)
-	 (define-key c++-mode-map "\{" 'insert-curly-brace)
-	 (define-key c++-mode-map "\(" 'insert-parens)
-	 (define-key c++-mode-map "\)" 'insert-parens2)
-	 ))
+         (define-key c++-mode-map "\," 'insert-comma)
+         (define-key c++-mode-map "\{" 'insert-curly-brace)
+         (define-key c++-mode-map "\(" 'insert-parens)
+         (define-key c++-mode-map "\)" 'insert-parens2)
+         ))
   )
 
 (defun kde-c-mode-hook ()

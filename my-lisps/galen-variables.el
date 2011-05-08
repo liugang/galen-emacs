@@ -39,11 +39,16 @@
                                    emacs-lisp-mode
                                    lisp-mode
                                    scheme-mode
-                                   c-mode
-                                   c++-mode
+                                   ; c-mode
+                                   ; c++-mode
                                    erlang-mode
                                    clojure-mode)
   "the modes need untabify")
+
+;; tabify some modes
+(defvar galen-var/tabify-modes '(c-mode
+                                 c++-mode)
+  "the modes need tabify")
 
 
 (defvar galen-var/script-firstline-patterns

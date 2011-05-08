@@ -18,10 +18,10 @@
 
     (defun galen-func/autopair-insert-opening ()
       (interactive)
-      (if (and (fboundp 'skeleton-c-mode-left-brace)
+      (if (and (fboundp 'galen-func/skeleton-c-mode-left-brace)
                (memq major-mode modes-use-self-opening)
                (equal last-command-event ?{))
-          (call-interactively 'skeleton-c-mode-left-brace)
+          (call-interactively 'galen-func/skeleton-c-mode-left-brace)
         (call-interactively 'galen-func/autopair-insert-opening-internal))))
 
   (defvar modes-use-self-opening
