@@ -213,8 +213,9 @@
 ;; (require 'face-settings)
 
 (require 'galen-face-settings)
-;; 高亮当前行
-(require 'galen-hl-line-settings)
+
+;; 高亮当前行 ； 与autopair冲突，使其不可用，highlight也看不见当前行的颜色
+;(require 'galen-hl-line-settings)
 
 ;; ;; diff
 ;; (require 'diff-settings)
