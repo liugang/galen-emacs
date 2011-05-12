@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/serializer
+END
+deserializer.rb
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/serializer/deserializer.rb
+END
+serializer.rb
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/serializer/serializer.rb
+END

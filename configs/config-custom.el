@@ -195,18 +195,20 @@
    ))
 
 ;; 输入左大花扩号自动补齐右大花括号
-(eal-define-keys
- `(c-mode-base-map awk-mode-map)
- `(("{" galen-func/skeleton-c-mode-left-brace)))
+;; (eal-define-keys
+;;  `(c-mode-base-map awk-mode-map)
+;;  `(("{" galen-func/skeleton-c-mode-left-brace)))
 
 (ido-mode t)
 
 (eal-define-keys-commonly
  global-map
  `(("C-M-]" galen-func/ywb-indent-accoding-to-paren)
-   ("C-x f" ido-find-file)
+;;   ("C-x f" ido-find-file)
    ;; exchange the two keys
    ("C-o" other-window)
-   ("C-x o" open-line)
+   ("C-x C-f" ido-find-file)
+   ("C-x f" find-file-at-point)
+;;   ("C-x o" open-line)
    ))
 

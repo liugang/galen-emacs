@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/server
+END
+simple_server.rb
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/server/simple_server.rb
+END
+base_server.rb
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/server/base_server.rb
+END
+threaded_server.rb
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/server/threaded_server.rb
+END
+thread_pool_server.rb
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/server/thread_pool_server.rb
+END
+mongrel_http_server.rb
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/server/mongrel_http_server.rb
+END
+nonblocking_server.rb
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/server/nonblocking_server.rb
+END

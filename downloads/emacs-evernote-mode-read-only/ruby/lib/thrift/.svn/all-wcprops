@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/2/trunk/ruby/lib/thrift
+END
+client.rb
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/client.rb
+END
+processor.rb
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/processor.rb
+END
+exceptions.rb
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/exceptions.rb
+END
+struct.rb
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/struct.rb
+END
+types.rb
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/types.rb
+END
+thrift_native.rb
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/thrift_native.rb
+END
+union.rb
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/union.rb
+END
+core_ext.rb
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/core_ext.rb
+END
+struct_union.rb
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/struct_union.rb
+END

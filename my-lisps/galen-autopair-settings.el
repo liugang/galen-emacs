@@ -8,7 +8,7 @@
   (setq autopair-extra-pairs `(:everywhere ((?` . ?'))))
 
   (defun galen-func/change-autopair-insert-opening ()
-    "Change definition of `galen-func/autopair-insert-opening'."
+    "Change definition of `autopair-insert-opening'."
 
     (defun galen-func/autopair-insert-opening-internal ()
       (interactive)
@@ -16,13 +16,15 @@
         (setq autopair-action (list 'opening (autopair-find-pair last-input-event) (point))))
       (autopair-fallback))
 
-    (defun galen-func/autopair-insert-opening ()
+    (defun autopair-insert-opening ()
       (interactive)
       (if (and (fboundp 'galen-func/skeleton-c-mode-left-brace)
                (memq major-mode modes-use-self-opening)
                (equal last-command-event ?{))
           (call-interactively 'galen-func/skeleton-c-mode-left-brace)
-        (call-interactively 'galen-func/autopair-insert-opening-internal))))
+        (call-interactively 'galen-func/autopair-insert-opening-internal)))
+
+    )
 
   (defvar modes-use-self-opening
     '(c-mode c++-mode java-mode awk-mode php-mode)
@@ -31,7 +33,9 @@
   (eal-eval-by-modes
    modes-use-self-opening
    (lambda (mode)
-     (galen-func/change-autopair-insert-opening))))
+     (galen-func/change-autopair-insert-opening)))
+
+  )
 
 (eval-after-load "autopair"
   '(galen-func/autopair-settings))

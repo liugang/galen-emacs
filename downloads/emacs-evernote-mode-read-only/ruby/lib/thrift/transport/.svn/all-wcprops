@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport
+END
+memory_buffer_transport.rb
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/memory_buffer_transport.rb
+END
+io_stream_transport.rb
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/io_stream_transport.rb
+END
+server_socket.rb
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/server_socket.rb
+END
+buffered_transport.rb
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/buffered_transport.rb
+END
+unix_server_socket.rb
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/unix_server_socket.rb
+END
+base_transport.rb
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/base_transport.rb
+END
+socket.rb
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/socket.rb
+END
+http_client_transport.rb
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/http_client_transport.rb
+END
+framed_transport.rb
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/framed_transport.rb
+END
+unix_socket.rb
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/unix_socket.rb
+END
+base_server_transport.rb
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/2/trunk/ruby/lib/thrift/transport/base_server_transport.rb
+END
