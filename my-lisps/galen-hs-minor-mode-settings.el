@@ -93,12 +93,13 @@
     '(hs-minor-mode-4-emaci-settings))
 
   ;; 默认的按键太复杂了
-  (galen-func/define-key-list
-    hs-minor-mode-map
-    `(("C-c h" hs-hide-block)
-      ("C-c H" hs-hide-all)
-      ("C-c e" hs-show-block)
-      ("C-c E" hs-show-all))))
+;  (galen-func/define-key-list
+;    hs-minor-mode-map
+;    `(("C-c h" hs-hide-block)
+;      ("C-c H" hs-hide-all)
+;      ("C-c e" hs-show-block)
+;      ("C-c E" hs-show-all)))
+      )
 
 (eval-after-load "hideshow"
   '(galen-func/hs-minor-mode-settings))

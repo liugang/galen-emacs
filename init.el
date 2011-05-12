@@ -374,7 +374,7 @@
 ;; ;; grep
 (require 'galen-grep-settings)
 
-(require 'galen-evernote-settings)
+
 ;; ;; ack-grep, grep纯perl的代替品
 ;; (require 'full-ack-settings)
 
@@ -608,7 +608,7 @@
 
 ;; ;; 王纯业的desktop, 比desktop快多了
 ;; (require 'wcy-desktop-settings)
-
+(require 'galen-evernote-settings)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
