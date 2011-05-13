@@ -1,14 +1,14 @@
 10
 
 dir
-146
+149
 http://emacs-evernote-mode.googlecode.com/svn/trunk/doc
 http://emacs-evernote-mode.googlecode.com/svn
 
 
 
-2011-05-11T22:35:07.562608Z
-146
+2011-05-12T09:32:10.771900Z
+147
 kawakami.paco.yusuke@gmail.com
 
 
@@ -32,10 +32,10 @@ file
 
 
 
-2011-05-12T08:12:32.358761Z
-6c0f0c36eda57e1c94f4359973145dd7
-2011-05-11T22:35:07.562608Z
-146
+2011-05-13T01:17:58.481762Z
+64ba222ed7f52cc3831a1f795f2fd633
+2011-05-12T09:32:10.771900Z
+147
 kawakami.paco.yusuke@gmail.com
 has-props
 
@@ -58,7 +58,7 @@ has-props
 
 
 
-21371
+24308
 
 readme_en.org
 file
@@ -66,10 +66,10 @@ file
 
 
 
-2011-05-12T08:12:32.359762Z
-2d7d787dd864e0476241c73acbf8fc91
-2011-05-11T22:35:07.562608Z
-146
+2011-05-13T01:17:58.482762Z
+ce03531e5499fe523565991b08f8c007
+2011-05-12T09:32:10.771900Z
+147
 kawakami.paco.yusuke@gmail.com
 
 
@@ -92,7 +92,7 @@ kawakami.paco.yusuke@gmail.com
 
 
 
-17593
+17610
 
 readme_ja.txt
 file
@@ -100,10 +100,10 @@ file
 
 
 
-2011-05-12T08:12:32.359762Z
-cbb97cf91e4ffd1e05326a99a2dddb72
-2011-05-11T22:35:07.562608Z
-146
+2011-05-13T01:17:58.491762Z
+a66a5ed7377dcb671014f0168db2bba8
+2011-05-12T09:32:10.771900Z
+147
 kawakami.paco.yusuke@gmail.com
 
 
@@ -126,7 +126,7 @@ kawakami.paco.yusuke@gmail.com
 
 
 
-23002
+22836
 
 readme_ja.html
 file
@@ -134,10 +134,10 @@ file
 
 
 
-2011-05-12T08:12:32.359762Z
-d573a3a800d1aeae83e0eaafc30670ea
-2011-05-11T22:35:07.562608Z
-146
+2011-05-13T01:17:58.493762Z
+413151da2cb184a5a8e29a57d362b5e6
+2011-05-12T09:32:10.771900Z
+147
 kawakami.paco.yusuke@gmail.com
 has-props
 
@@ -160,7 +160,7 @@ has-props
 
 
 
-26365
+29318
 
 readme_ja.org
 file
@@ -168,10 +168,10 @@ file
 
 
 
-2011-05-12T08:12:32.359762Z
-e5f325aee72984ecec1e9b383fb038f4
-2011-05-11T22:35:07.562608Z
-146
+2011-05-13T01:17:58.494762Z
+5f18040461016ec121a4e006311c6089
+2011-05-12T09:32:10.771900Z
+147
 kawakami.paco.yusuke@gmail.com
 
 
@@ -194,7 +194,7 @@ kawakami.paco.yusuke@gmail.com
 
 
 
-22467
+22505
 
 readme_en.txt
 file
@@ -202,10 +202,10 @@ file
 
 
 
-2011-05-12T08:12:32.360762Z
-df5ba75f8806f7522f557f7eab9856b6
-2011-05-11T22:35:07.562608Z
-146
+2011-05-13T01:17:58.494762Z
+ed62d1c895317b2faa982a30add7a677
+2011-05-12T09:32:10.771900Z
+147
 kawakami.paco.yusuke@gmail.com
 
 
@@ -228,5 +228,5 @@ kawakami.paco.yusuke@gmail.com
 
 
 
-17997
+17829
 

@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 23
-/svn/!svn/ver/146/trunk
+/svn/!svn/ver/149/trunk
 END
 evernote-mode.el
 K 25
@@ -13,7 +13,7 @@ credits.txt
 K 25
 svn:wc:ra_dav:version-url
 V 35
-/svn/!svn/ver/146/trunk/credits.txt
+/svn/!svn/ver/149/trunk/credits.txt
 END
 APACHE-LICENSE-2.0.txt
 K 25
