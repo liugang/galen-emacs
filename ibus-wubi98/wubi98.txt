@@ -15,10 +15,10 @@ UUID = a66b8256-28d4-4af2-acc4-895460b3449c
 ### A unique number indicates the version of this file.
 ### For example the last modified date of this file.
 ### This number must be less than 2^32.
-SERIAL_NUMBER = 20110513
+SERIAL_NUMBER = 20110514
 
 ### ICON = @SCIM_ICONDIR@/wubi.png
-ICON = /usr/share/ibus-table/icons/wubi98.svg
+ICON = wubi98.svg
 
 ### The default name of this table
 NAME = WuBi98
@@ -37,7 +37,7 @@ AUTHOR = Galen
 STATUS_PROMPT = CN
 
 ### Valid input chars.
-VALID_INPUT_CHARS = abcdefghijklmnopqrstuvwxy
+VALID_INPUT_CHARS = abcdefghijklmnopqrstuvwxyz
 
 MAX_KEY_LENGTH = 4
 
