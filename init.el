@@ -611,7 +611,21 @@
 (require 'galen-evernote-settings)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(autoload 'trac-wiki "trac-wiki"
+  "Trac wiki editing entry-point." t)
 
+(autoload 'trac-wiki-mode "trac-wiki"
+  "Trac wiki editing entry-point." t)
+
+(defun trac-wiki-auto-mode-function ()
+  (if (and (eq major-mode 'text-mode)
+           (member (file-name-extension (buffer-file-name))
+                   '("txt" "wiki"))
+           (re-search-forward "^=+ [^=\n]+ =+\\s *$" nil t))
+      (trac-wiki-mode)))
+
+(add-hook 'find-file-hook
+          'trac-wiki-auto-mode-function)
 
 (setq custom-file "~/.emacs.d/configs/config-custom.el")
 (load custom-file 'noerror)

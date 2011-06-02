@@ -122,7 +122,7 @@
 
 ;; 当你在shell、telnet、w3m等模式下时，必然碰到过要输入密码的情况,此时加密显出你的密码
 (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
-(add-hook 'before-save-hook 'galen-func/trailing-whitespace-hook)
+;; (add-hook 'before-save-hook 'galen-func/trailing-whitespace-hook)
 (add-hook 'before-save-hook 'galen-func/untabify-hook)
 (add-hook 'before-save-hook 'galen-func/tabify-hook)
 

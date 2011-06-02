@@ -7,8 +7,8 @@
    global-map
    `(("C-x g"   find-grep-in-current-dir)
      ("C-x G"   find-grep-in-dir)
-     ("C-x M-f" find-grep-current-word-in-current-dir)
-     ("C-x M-F" find-grep-current-word-in-dir)))
+     ("C-x M-g" find-grep-current-word-in-current-dir)
+     ("C-x M-G" find-grep-current-word-in-dir)))
 
   (eal-define-keys
    'grep-mode-map
