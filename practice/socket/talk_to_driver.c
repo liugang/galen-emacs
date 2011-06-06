@@ -100,8 +100,82 @@ iw_get_priv_info(int skfd, char *ifname, struct iw_priv_args * priv, int maxpriv
 	if (ioctl(skfd, SIOCGIWPRIV, &wrq) < 0)
 		return (-1);
 
+	printf("========== errno = %d\n", errno);
 	/* Return the number of ioctls */
 	return (wrq.u.data.length);
+}
+
+#define RT_OID_WE_VERSION_COMPILED		    0x0622
+// #define RT_PRIV_IOCTL								(SIOCIWFIRSTPRIV + 0x0E)
+#define RT_PRIV_IOCTL							(SIOCIWFIRSTPRIV + 0x01) /* Sync. with AP for wsc upnp daemon */
+
+static int
+ralink_get_we_version_compiled(int skfd, char *ifname)
+{
+	struct iwreq iwr;
+	unsigned int we_version_compiled = 0;
+
+	memset(&iwr, 0, sizeof(iwr));
+//	os_strlcpy(iwr.ifr_name, drv->ifname, IFNAMSIZ);
+	iwr.u.data.pointer = (caddr_t) &we_version_compiled;
+	iwr.u.data.flags = RT_OID_WE_VERSION_COMPILED;
+	strncpy(iwr.ifr_name, ifname, IFNAMSIZ);
+
+	if (ioctl(skfd, RT_PRIV_IOCTL, &iwr) < 0) {
+		printf("%s: failed, errno = %d\n", __func__, errno);
+		return -1;
+	}
+
+	// drv->we_version_compiled = we_version_compiled;
+	printf("we version = %d\n", we_version_compiled);
+	return 0;
+}
+
+#define OID_P2P_WSC_PIN_CODE		0x080a
+#define OID_802_11_P2P_DEVICE_NAME			0x0802
+static int
+ralink_get_device_name(int skfd, char *ifname)
+{
+	struct iwreq iwr;
+	char device_name[120];
+
+	memset(&iwr, 0, sizeof(iwr));
+	memset(device_name, 0, sizeof(device_name));
+	printf("size of device_name[120] = %d\n", sizeof(device_name));
+
+	iwr.u.data.pointer = (caddr_t) device_name;
+	iwr.u.data.flags = OID_802_11_P2P_DEVICE_NAME;
+	strncpy(iwr.ifr_name, ifname, IFNAMSIZ);
+
+	if (ioctl(skfd, RT_PRIV_IOCTL, &iwr) < 0) {
+		printf("%s: failed, errno = %d\n", __func__, errno);
+		return -1;
+	}
+
+	// drv->device_name = device_name;
+	printf("device name = %s\n", device_name);
+	return 0;
+}
+
+static int
+ralink_get_pin_code(int skfd, char *ifname)
+{
+	struct iwreq iwr;
+	unsigned int pin_code = 0;
+
+	memset(&iwr, 0, sizeof(iwr));
+	iwr.u.data.pointer = (caddr_t) &pin_code;
+	iwr.u.data.flags = OID_P2P_WSC_PIN_CODE;
+	strncpy(iwr.ifr_name, ifname, IFNAMSIZ);
+
+	if (ioctl(skfd, RT_PRIV_IOCTL, &iwr) < 0) {
+		printf("%s: failed, errno = %d\n", __func__, errno);
+		return -1;
+	}
+
+	// drv->pin_code = pin_code;
+	printf("pin code = %d\n", pin_code);
+	return 0;
 }
 
 /*------------------------------------------------------------------*/
@@ -315,7 +389,13 @@ int main(int argc, char *argv[])
 
 	printf("======	skfd = %d ======\n", skfd);
 
-	ret = set_private(skfd, "p2p0", "stat", (void *)&data, arg_count, NULL);
+//	ret = set_private(skfd, "p2p0", "stat", (void *)&data, arg_count, NULL);
+	// test
+//	ralink_get_we_version_compiled(skfd, "ra0");
+	ralink_get_pin_code(skfd, "p2p0");
+	ralink_get_device_name(skfd, "p2p0");
+
+#if 0
 	if (ret == -1) {
 		fprintf(stderr, "wrong stat ioctl command\n");
 		close(skfd);
@@ -330,6 +410,7 @@ int main(int argc, char *argv[])
 	} else {
 		printf("data from driver is empty\n");
 	}
+#endif
 
 	close(skfd);
 
