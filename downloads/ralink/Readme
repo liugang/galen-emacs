@@ -1,3 +1,12 @@
+DBGPRINT(RT_DEBUG_ERROR, ("message\n"));
+
+find . -name "*ko" |xargs -I{} cp {} ../ko
+
+如果当前状态不是listen, 
+并且它不是client， 忽略该message sync.c 文件中VOID PeerProbeReqAction()
+进入相应线程的消息队列中。 然后在p2p_packets.c 中处理相应的消息
+
+
 ftp://ftp-public:f5db3b0d@172.18.83.205/IS_AP_STA_RT2870_D-3.1.8.0_VA-3.1.8.0_W7-3.1.8.0_RU-4.0.4.0_AU-4.0.4.0_123110_1.5.11.0WP_Free.exe
 
 
@@ -5,3 +14,124 @@ ftp://ftp-public:f5db3b0d@172.18.83.205/IS_AP_STA_RT2870_D-3.1.8.0_VA-3.1.8.0_W7
     Email Account: t@alphanetworks.com
     Password: tvxUVLTX7
     Website: http://t3s.ralinktech.com.tw/t3s/login.php 
+
+
+ifdef CONFIG_CTRL_IFACE
+OBJS += ../src/ap/ctrl_iface_ap.o
+endif
+
+ifdef CONFIG_CTRL_IFACE
+ifeq ($(CONFIG_CTRL_IFACE), y)
+     ifdef CONFIG_NATIVE_WINDOWS
+     	   CONFIG_CTRL_IFACE=named_pipe
+     else
+	   CONFIG_CTRL_IFACE=unix
+     endif
+
+
+参数
+-f debug_file.txt
+
+
+
+-Dralink -c /etc/wpa_supplicant.conf -i ra0 -dt
+
+
+
+/work/develop/ralink/driver/MODULE/include/p2p_cmm.h +132
+typedef enum	_P2P_DISC_EVENT
+{
+	P2P_DISC_SCAN_CMD_EVT,
+	P2P_DISC_LISTEN_CMD_EVT,
+	P2P_DISC_SEARCH_CMD_EVT,
+	P2P_DISC_CANL_CMD_EVT,
+	P2P_DISC_PEER_PROB_REQ,
+	P2P_DISC_PEER_PROB_RSP,
+	P2P_DISC_MAX_EVENTS,
+} P2P_DISC_EVENT;
+
+
+/work/develop/ralink/driver/MODULE/sta/sync.c +2133
+VOID PeerProbeReqAction(
+	IN PRTMP_ADAPTER pAd, 
+	IN MLME_QUEUE_ELEM *Elem) 
+{
+
+	/* P2P device and Listen State could response Probe Req. */
+	if ((pAd->P2pCfg.DiscCurrentState == P2P_DISC_LISTEN) && !(P2P_CLI_ON(pAd)))
+		MlmeEnqueue(pAd, P2P_DISC_STATE_MACHINE, P2P_DISC_PEER_PROB_REQ, Elem->MsgLen, Elem->Msg, TRUE);
+
+
+
+/work/develop/ralink/driver/MODULE/include/rtmp.h
+/* */
+/*  The miniport adapter structure */
+/* */
+struct _RTMP_ADAPTER {} +3335
+typedef struct _RTMP_ADAPTER *PRTMP_ADAPTER;   +76
+
+
+
+
+Jun  5 15:04:08 localhost kernel: [  914.729276]  !FIND!!!!!!===>P2P - PeerP2pProbeReq P2P IE Len = 24.   P2P_CONNECT_IDLE
+Jun  5 15:04:08 localhost kernel: [  914.729284] P2P Peer Probe Req from d8 5d 4c 8e f9 f5	
+Jun  5 15:04:08 localhost kernel: [  914.729293] P2PSTATE_DISCOVERY_GO  
+Jun  5 15:04:08 localhost kernel: [  914.729300] SYNC - P2PMakeProbeRsp. Addr2 = d8:5d:4c:8e:f9:f5...
+Jun  5 15:04:08 localhost kernel: [  914.729312] <----- P2pMakeP2pIE (Len = 45) 
+Jun  5 15:04:08 localhost kernel: [  914.729330] Got P2P Peer 0 Probe Req . Send probe response back  len=168 
+
+
+/work/develop/ralink/driver/MODULE/common/p2p_packet.c +3392   FIND  ->  in PeerP2pProbeReqSanity()
+/work/develop/ralink/driver/MODULE/common/p2p_packet.c +4269   P2P Peer Probe Req from d8 5d 4c 8e f9 f5  -> PeerP2pProbeReq()
+
+
+sta_cfg.c 中的io_ctl都通过ra0进行配置.
+	pAd				- WLAN control block pointer
+
+
+/work/develop/ralink/driver/MODULE/sta/sta_cfg.c +174
+    {"WpaSupport",		    Set_Wpa_Support},
+
+pAd->StaCfg.WpaSupplicantUP = WPA_SUPPLICANT_DISABLE;
+
+/work/develop/ralink/driver/MODULE/sta/sta_cfg.c +3353 set
+case RT_OID_WPA_SUPPLICANT_SUPPORT:
+
+/work/develop/ralink/driver/MODULE/sta/sta_cfg.c +4896 query 查询默认状态
+case RT_OID_WPA_SUPPLICANT_SUPPORT:
+
+
+
+
+/work/develop/ralink/driver/MODULE/README_STA_usb  +67
+3> In os/linux/config.mk 
+	define the GCC and LD of the target machine
+	define the compiler flags CFLAGS
+	modify to meet your need.
+	** Build for being controlled by NetworkManager or wpa_supplicant wext functions
+	   Please set 'HAS_WPA_SUPPLICANT=y' and 'HAS_NATIVE_WPA_SUPPLICANT_SUPPORT=y'.
+	   => #>cd wpa_supplicant-x.x
+	   => #>./wpa_supplicant -Dwext -ira0 -c wpa_supplicant.conf -d
+	** Build for being controlled by WpaSupplicant with Ralink Driver
+	   Please set 'HAS_WPA_SUPPLICANT=y' and 'HAS_NATIVE_WPA_SUPPLICANT_SUPPORT=n'.
+	   => #>cd wpa_supplicant-0.5.7
+	   => #>./wpa_supplicant -Dralink -ira0 -c wpa_supplicant.conf -d
+
+
+    #[kernel 2.6]
+    #    $/sbin/insmod rt2870sta.ko
+    #    $/sbin/ifconfig ra0 inet YOUR_IP up
+
+
+
+/usr/src/kernels/2.6.38.6-27.fc15.i686.PAE/include/linux/netdevice.h:1241:#define SET_NETDEV_DEV(net, pdev)	((net)->dev.parent = (pdev))
+
+
+
+nfsroot=172.18.83.201:/home/joshua/dma.git/core_repos/build/root
+
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -A FORWARD -i eth0 -o p2p0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i p2p0 -o eth0 -j ACCEPT

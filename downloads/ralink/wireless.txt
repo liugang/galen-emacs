@@ -1,0 +1,1037 @@
+第 4 章 建立 Linux 无线接入点
+
+4.0 介绍
+
+问题
+
+无线网络遍布各处。终有一天，我们会在脑袋里装上嵌入式的无线接收器。现在，Linux 无
+线网络管理员的工作越来越容易了，只要你选购支持 Linux 和 WPA2 的无线网卡即可。使用
+支持良好的无线网卡，意味着你就无需纠缠于稀奇古怪的各种驱动问题，而可以直接专注于
+配置你的网络。本章展示了如何在 Soekris 单板计算机上，使用 Pyramid Linux 搭建一个
+安全、灵活、健壮的无线接入点/路由器/Internet 防火墙多功能一体设备。它支持通过无线
+和有线网络，让 Linux、Windows 和 Mac OS X 客户端共享一条宽带 Internet 连接和 LAN
+服务。一堆有线和无线客户端都可以和谐相处。
+
+为什么要这么麻烦呢？因为你可以由此得到更多的控制权，所有想要的强大功能，还能节省
+不少成本。
+
+你无须搭建一台一体机。本章中各个小节都可以很容易地用来分别制作独立的设备，比如专
+用的防火墙或者单独的无线接入点等。
+
+我使用 Pyramid Linux、Soekris 或 PC Engines WRAP 主板，还有 Atheros 无线网卡，因
+为它们都久经考验，而且我知道它们会工作得很好。参阅第 2 章，学习如何使用这些很棒的
+小路由板。
+
+用于不同服务，如 DHCP、DNS、验证、iptables 等等的配置样例，也同样适用于基于
+Debian Linux 的发行版，以及任何 x86 架构的机器。让它们适用于其它发行版，意味着要
+描述配置网卡的各种不同方式，而在任何系统中配置类似 hostapd、dnsmasq 和 iptables
+等应用的方式几乎完全一致。
+
+某些人对于“原生 Linux 支持”这样的表述感到有一点困惑。它并不是说要使用
+ndiswrapper 这样的 Windows 二进制驱动包装器。除非我已经没钱购买一块原生支持
+Linux 的网卡，否则我绝对不会这种程序。它只在客户端可用，不支持所有的设备或者特性，
+而且抽取 Windows 二进制驱动也要费一点工夫。更糟糕的是，这样做会变相鼓励那些不支持
+Linux 用户的厂商。
+
+现在，对 Linux 提供不同程度支持的无线网络芯片制造商有 Ralink、Realtek、Atheros、
+Intel 和 Atmel。此外还有针对市面上流行的 Broadcom 和 Intersil Prim 芯片的反向工程
+GPL Linux驱动程序。
+
+尽管所有这些芯片都有开源驱动程序（http://opensource.org），Atheros 芯片还是需要在
+Linux 内核中放置一个闭源的二进制硬件访问层（HAL）。较早的 Intel 芯片需要一个运行
+在用户层的二进制管理守护进程，而现在的新一代芯片已经不需要了。Ralink 和 Realtek
+在无线电固件里处理这项工作。按理来说，它要防止用户随意变更频率，超出 FCC 所允许的
+范围。将一个闭源的模块塞进内核，使得编写和调试 Linux 驱动会变得更为困难，因为无线
+电功能最核心的部分被隐藏了。其它顾虑还有，二进制模块可能会污染内核，一个有问题的
+内核拨开会导致内核崩溃，而只有厂商才能修正。有问题的固件影响会小一点，那样最多只
+会让设备工作不正常。管理模块可能产生的问题都不太确定，随时会发生变化。（在“参阅”
+部分可以看到相关有趣的信息。）
+
+我在无线接入点中使用 Wistron CM9 mini-PCI 网卡（基于 Atheros AR5213 芯片），因为
+它可以提供完整的功能：客户端、主机、点对点、原始模式监控、WPA/WPA2，以及所有三种
+WiFi（a/b/g）波段全都支持。在 Linux 客户端上，任何支持 Linux 的无线网卡都可以正常
+工作。注意 USB 网卡——某些在 Linux 上工作正常，某些产品则完全无法工作。你不妨从
+Google 和本节末尾的资源列表中获取帮助。
+
+要在购买任何特定设备之前了解芯片类型是非常痛苦的——多数厂家不会主动提供此类信息，
+他们喜欢说“换掉芯片”，而不是在购买之前让你很容易地找到芯片信息。想要花最少的工夫
+搞定无线网络，你得先咨询一家专注于 Linux 无线产品的硬件厂商。
+
+一种廉价但是比 Soekris 和 PC Engines 路由板更为强大的替代产品，是那些四个端口的消
+费级无线宽带路由器，比如 Linksys WRT54G 系列。有多种不同品牌的同类产品，而你还可
+能发现不少价格低于 50 美元的产品。你的路由板越大，灵活性就越小，但是它们物有所值，
+可以成为优秀的专用无线接入点。若要将这些普通家用设备转变为价值 500 美金的超强路由
+器，关键是要把固件替换为 OpenWRT（http://openwrt.org/）或
+DD-WRT（www.dd-wrt.com/）。这些都是开源、免费（尽管如此，给他们送点钱去也无妨），
+特别为这些小路由器设计的固件。使用新的固件，你就可以完成一些惊人的壮举，比如包过
+滤、带宽整形、无线安全、VLAN、名称服务等等。
+
+
+安全
+
+当你设置无线网络时，安全是特别需要注意的。你的数据被送往天空，很容易被人窃听网络
+通讯内容。不作任何保护的无线接入点，可能将你暴露在两种不同的威胁之下：
+
+ � LAN 入侵。你的数据会失窃，或者 LAN 主机变成恶意软件传播的木马网络一员，或被用
+ 作 MP3 和色情内容下载的服务器。
+ 
+ � 损失带宽。共享当然不错，但是为什么要让那些免费用户来影响你的网络性能呢？或者更
+ 糟，为什么允许他们将你的带宽用于非法目的？
+ 
+如果你希望提供一个开放的接入点，不妨采取一种聪明的方式。将其与你的 LAN 之间用防火
+墙安全隔离，并且限制它的带宽。有一种实现方式是，使用另一个无线网卡，如果你的路由
+器支持的话，或者是专用接入点，然后用 iptables 转发流量到你的 WAN 网卡，并且阻止其
+访问你的 LAN。Pyramid Linux 附带 WiFiDog 门户，你可以用它来提醒访客。通过 web 界
+面设置该软件，只需要点点鼠标即可。
+
+加密和验证无线流量是首要问题。你该如何设置？以前，我们用过“有线等效隐私”（WEP）。
+使用 WEP 至少比什么都不用要好一些——当然，它非常脆弱，这是众所周知的，而且可以在
+15 分钟内用工具破解，这些工具到处可见，比如 AirSnort 和 WEPCrack。不要使用 WEP。
+建议升级到支持 Wi-Fi 保护访问（WPA）的设备。
+
+现在有两种 WPA：WPA 和 WPA2。WPA 由 WEP 升级而来，均使用 RC4 流加密。它被设计为
+WEP 和 WPA2 之间的过渡协议。WPA 比 WEP 更强，但是略逊于 WPA2。WPA2 使用一种新的强
+加密协议，名为“计数器模式及密码区块链信息认证码协议”（CCMP），是一种基于高级加密
+标准（AES）的协议。WPA2 是 802.11i 标准的完全实现。参阅 Matthew Gast 的名著
+《802.11 无线网络权威指南》（O'Reilly），以获取更多信息。简而言之，使用 WPA2 可以
+提供最佳保护。
+
+使用支持 WPA2 的无线设备，使加密和验证无线流量变得更为简单。WPA 支持两种不同类型
+的验证：WPA-PSK（即 WPA-Personal，使用已共享的密钥），以及 WPA-EAP（即
+WPA-Enterprise，使用可扩展验证协议）。
+
+WPA-Personal 很容易设置。它依赖于一个共享的密钥，也就是一个口令，这个口令必须分发
+给所有授权用户。没有任何内置的方法来分发该密钥，你得自行手工分发，或者写一个聪明
+的脚本，要么使用 cfengine 之类的工具。这种方式有一个明显的缺陷是，大家都使用同一
+个密钥，一旦你需要改变密钥，就要在所有客户端上都修改一遍。尽管如此，还是有一种方
+式可以给用户提供唯一的密钥——使用 hostapd，主机接入点守护进程。这是 HostAP 无线驱
+动和工具程序套件的一部分，而其包含了一种管理多个密钥的简单机制。这是一种平滑、简
+单的方式，可以实现又好又强大的安全性。
+
+WPA-Enterprise 需要一台验证服务器，通常是一台 RADIUS 服务器。安装颇费工夫，而一旦
+启用，就可以很方便地管理用户和密钥。如果你只有一个接入点，那么使用 RADIUS 服务器
+就如同杀鸡用牛刀，但是对于多个节点的网络，比如拨号网络、VPN 网关，以及多个无线接
+入点来说，RADIUS 可以节省大量时间，因为它们都可以通过单台 RADIUS 服务器进行验证和
+授权。
+
+HostAP 包括一个嵌入的 RADIUS 服务器。其它接入点可以将其当作独立的 RADIUS 服务器使
+用。
+
+wpa_supplicant 处理客户端和服务器之间的交互。wpa_supplicant 在所有 Linux 发行版中
+都有，尽管可能并没有默认安装。Mac OS X 和 Windows 也有这样的 supplicant 功能。
+Supplicant 这个词是经过慎重考虑之后才选择的，意为请求访问网络的权限。
+
+
+参阅
+
+这些文章讨论了二进制模块的问题：
+
+ � “OpenBSD: wpi, A Blob Free Intel PRO/Wireless 3945ABG Driver”:
+      http://kerneltrap.org/node/6650
+ 
+ � “Feature: OpenBSD Works To Open Wireless Chipsets”:
+      http://kerneltrap.org/node/4118
+
+要搭建自己的无线接入点，并且获得无废话的产品信息，可以看看这些在线零售商：
+
+ � Metrix.net http://metrix.net/metrix/ 提供定制基于 Pyramid Linux 的无线接入点和
+ 相关配件，以及定制服务。� Netgate.com: http://netgate.com/ � Mini-box.com:
+ http://www.mini-box.com/ � Routerboard.com: http://www.routerboard.com �
+ DamnSmallLinux.org 商店: http://www.damnsmallinux.org/store/
+
+在这些站点上可以通过品牌和型号识别无线网络芯片：
+
+ � MadWifi.org 可以查询 Atheros 设备: http://madwifi.org/ � Atheros.com:
+ http://www.atheros.com/ � rt2x00 为 Ralink 设备的驱动程序开源项目:
+ http://rt2x00.serialmonkey.com/wiki/index.php?title=Main_Page � FSF 认证的无线网
+ 卡: http://www.fsf.org/resources/hw/net/wireless/cards.html
+
+常用无线网络资源：
+
+ � Ralinktech.com: http://www.ralinktech.com/ � Linux on Realtek:
+ http://rtl8181.sourceforge.net/ � Realtek.com:
+ http://www.realtek.com.tw/default.aspx � FSF 的无线网卡支持列表:
+ http://www.fsf.org/resources/hw/net/wireless/cards.html � Seattle Wireless，所有
+ 与无线网络相关的资源，尤其专注于搭建社区网络: http://seattlewireless.net/ �
+ LiveKiosk: http://www.livekiosk.com � Linux 无线 LAN 资源，Linux 无线网络相关信
+ 息的源泉: http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/
+
+
+4.1 架设 Linux 无线接入点
+
+问题
+
+你不想弄一个预制的商用无线接入点。它们对于你的需求来说，不是太简单且太不灵活，就
+是太贵而且不灵活。所以，就像 Linux 专家一样，你想自己做一个。你要的是一个又小又安
+静，紧凑而且可定制的机器，而且可以随需添加或去除特性功能，就像在任何一台 Linux 计
+算机上能做的一样。对于初学者来说，你想在一个盒子里集成所有功能：带验证的无线接入
+点，宽带 Internet 连接共享，iptables 防火墙，还有名称服务等。
+
+
+解决方案
+
+ � 在一台 Soekris 或 PC Engines WRAP 单板计算机上安装 Pyramid Linux。� 安装一个基
+ 于 Atheros 的无线 mini-PCI 卡，并且连接一个外部天线。� 配置并测试 LAN 的连通性，
+ 还有 DHCP 和 DNS。� 将你的路由器与 Internet 断开，直到它的安全加固、外围防火墙及
+ 测试工作完成为止。� 连上 Internet，大功告成！
+
+继续阅读下面各节，学习如何完成上述事项。
+
+
+讨论
+
+如果你喜欢把服务独立放在不同的物理机器上，比如无线接入点、防火墙和域名服务器各一
+台，阅读本章中各节就能很方便地完成任务。
+
+Soekris 有两个系列的路由板：45xx 和 48xx。任意选择一个适合你需求的型号。你至少需
+要 64 MB RAM，一个 Compact Flash 插槽，一个 mini-PCI 插槽，还有两个以太网端口。更
+强劲的 CPU 和更多的内存总是好的。再加一个 mini-PCI 插槽可以让你多加一块无线网卡。
+PCMCIA 插槽可以提供更多的灵活性，因为这样的插槽可以同时支持有线和无线网卡。
+
+45xx 主板具有 100 或 133 MHz CPU，以及 32 到 128 MB 的 SDRAM。而 48xx 主板具有
+233 或 266 MHz 处理器，以及 128 到 256 MB SDRAM。你将发现网络速度在 45xx 主板上可
+以达到 17 Mbps，而在更强劲的 48xx 主板上可以达到 50 Mbps。17 Mbps 比多数有线或
+DSL Internet 连接都要快。对于通常的 web 浏览和 email 来说，45xx 主板已足够。如果
+你正在运行 VoIP 服务、网络游戏、服务多于 50 位用户，或者运行任何诸如 BitTorrent
+之类的 P2P 协议软件，那么就该使用 48xx 主板。
+
+PC Engines WRAP 主板与 Soekris 主板类似，而且一般会便宜一些。两者均使用 Geode
+CPU，大小差不多，功能也相似。两家厂商都能按照你的想法定制他们的主板。
+
+
+参阅
+
+ � 第 2 章� 第 17 章� Soekris.com: http://www.soekris.com/ � MadWifi.org:
+ http://madwifi.org/
+
+
+4.2 桥接无线网络至有线链路
+
+问题
+
+你如何整合有线和无线客户端，使它们可以在一个大子网中共享 Internet 连接和 LAN 服务？
+你知道，同一台机器上的多块以太网卡不能放在一个子网中，而必须设置不同子网的地址。
+但是你想让它们都在一个子网中，而且不想花费太多管理成本，那么你该如何实现呢？
+
+
+解决方案
+
+你的路由板需要至少三块网卡：Atheros 网卡，加上两块以太网卡。ath0 是你的无线网卡，
+eth0 是 LAN 网卡，而 eth1 是你的 WAN 网卡。
+
+我们将要做的是在 ath0 和 eth0 之间搭建一个以太网桥。拷贝这个
+/etc/network/interfaces 样例文件，用你自己的 LAN 地址和 ESSID 替换其中相关部分。
+记得先要运行 /sbin/rw，使 Pyramid 文件系统可写：
+
+    pyramid:~# /sbin/rw pyramid:~# nano /etc/network/interfaces
+
+    ##/etc/network/interfaces wireless bridge configuration auto lo iface lo
+    ## inet loopback
+
+    auto br0 iface br0 inet static address 192.168.1.50 network 192.168.1.0
+    netmask 255.255.255.0 broadcast 192.168.1.255 bridge_ports ath0 eth0
+    post-down wlanconfig ath0 destroy pre-up wlanconfig ath0 create wlandev
+    wifi0 wlanmode ap pre-up iwconfig ath0 essid "alrac-net" channel 01 rate
+    auto pre-up ifconfig ath0 up pre-up sleep 3
+    
+你可以通过与某些具有静态 IP 地址的 LAN 主机连接，马上进行测试。首先在路由器上重启
+网络：
+
+    pyramid:~# /etc/init.d/networking restart
+    
+这样就创建了一个开放的无线接入点。将你的客户端指向默认网关 192.168.1.50，就应该可
+以很方便地让任何无线客户端接入你的 LAN，并且还能 ping 有线和无线 PC。当你完成时，
+记得将文件系统恢复到只读状态：
+
+    pyramid:~# /sbin/ro
+    
+
+讨论
+
+本节所述方法是完全不安全的，但是它可以让你在添加更多服务之前，测试网桥和无线网络
+连接。
+
+让我们回顾一下该配置中涉及的选项：
+
+bridge_ports定义建立桥接的两个网卡。
+    
+post-down wlanconfig ath0 destroy这条命令可以让接入点在网卡关闭时，也自动关闭。
+    wlanconfig 是 MadWiFi-ng 的一部分。使用它创建、销毁和管理接入点。使用
+    wlanconfig，你可以在单个设备上建立多个接入点。
+
+pre-up wlanconfig ath0 create wlandev wifi0 wlanmode ap wifi0 是内核给 Atheros 网
+    卡的名称，你可以在 dmesg 中看到。接下来，wlanconfig 创建了虚拟接入点 ath0，基
+    于 wifi0。
+    
+pre-up iwconfig ath0 essid "alrac-net" channel 01 rate auto分配 ESSID、通道和速率。
+    要查看网卡所支持的通道、频率和速率，使用这条命令：
+    
+        pyramid:~# wlanconfig ath0 list chan
+
+你如何知道要使用哪个通道？如果你只有一个接入点，第 1 个通道应该可以使用。如果你有
+三个，那就试试第 1、6、11 通道。对于更复杂的网络，请参考 Matthew Gast 的名著
+《802.11 无线网络权威指南》（O'Reilly）：
+
+pre-up ifconfig ath0 up在网桥启动之前启用 ath0。
+    
+pre-up sleep 3短暂停顿，确认一切按顺序启动。
+
+你不必通过传统方式建立网桥，比如给 eth0 配置一个全 0 IP 地址，或者在网桥建立之前
+启动等，因为 /etc/network/if-pre-up.d 中的相关脚本会为你处理这些事。
+
+我相信某些人会想要使用 ebtables。ebtables 就像以太网桥的 iptables。iptables 不能
+过滤桥接流量，而 ebtables 可以。有很多种天才的方式可以让你在网络中使用 ebtables
+和以太网桥。在本章中，我有意将 ebtables 放在一边，因为我们要在接入点上运行一个
+iptables Internet 防火墙。ebtables 不适合 Internet 防火墙，而试图在同一台机器中运
+用两者，对于老管理员来说也太复杂了。
+
+
+参阅
+
+ � Pyramid Linux 不包含文档，所以你应当在 PC 上安装本章所提及的应用程序，或者依赖
+ Google 的帮助亦可� wlanconfig 是 MadWiFi-ng 的一部分� man 8 brctl 获取桥接选项的
+ 帮助� iwconfig 是 wireless-tools 软件包的一部分� man 8 iwconfig � Pyramid
+ Linux: http://pyramid.metrix.net/ � 第 3.2 节� 《802.11 无线网络权威指南》，
+ Matthew Gast 著 (O’Reilly)
+
+ 
+4.3 设立域名服务
+
+问题
+
+你的 LAN 里面有很多具有静态 IP 地址的主机和进进出出的 DHCP 客户端，尤其是无线网络
+客户端。而且，你想要 DHCP 客户端自动加入 DNS，以便直接通过主机名访问它们，就像访
+问那些具有静态 IP 地址的主机一样。
+
+
+解决方案
+
+你不想要太多功能。但幸运的是，你可以拥有全部。Pyramid 带有 dnsmasq，可以实现
+DHCP 和 DNS 功能，而且会自动将 DHCP 客户端登记到 DNS 中。这就要求客户端在申请
+DHCP 租约时，发送它们的主机名。Windows 客户端会默认做这样的事。多数 Linux 客户端
+则不会，可以阅读第 4.5 节学习客户端配置相关内容。
+
+现在，我们将会在你的 Pyramid 机器上编辑 /etc/dnsmasq.conf 文件。首先通过运行
+/sbin/rw 使文件系统可写。拷贝这个样例，使用你自己的网络名称代替 alrac.net，你所喜
+欢的 DHCP 范围，以及你自己的上游域名服务器：
+
+    pyramid:~# /sbin/rw pyramid:~# nano /etc/dnsmasq.conf
+
+    domain-needed bogus-priv local=/alrac.net/ expand-hosts domain=alrac.net
+    interface=br0 listen-address=127.0.0.1
+
+    #upstream nameservers server=22.33.44.2 server=22.33.44.3
+
+    dhcp-range=lan,192.168.1.100,192.168.1.200,12h dhcp-lease-max=100
+
+下一步，将所有已设置静态地址的主机添加至 Pyramid 机器上的 /etc/hosts 文件中，只使
+用它们的主机名和 IP 地址即可。至少，其中必须要有 localhost 和 Pyramid 路由器的条
+目：
+
+    ## /etc/hosts 127.0.0.1 localhost 192.168.1.50 pyramid 192.168.1.10 xena
+    192.168.1.74 uberpc
+
+重启 dnsmasq:
+
+    pyramidwrap:~# killall dnsmasq
+
+要测试你的新域名服务器，可以在 LAN 中的各台主机上相互 ping：
+
+    $ ping pyramid $ ping xena $ ping uberpc
+
+你应该可以看到这样的回应信息：
+
+    PING pyramid.alrac.net (192.168.1.50) 56(84) bytes of data.  64 bytes from
+    pyramid.alrac.net (192.168.1.50): icmp_seq=1 ttl=64 time=0.483 ms 64 bytes
+    from pyramid.alrac.net (192.168.1.50): icmp_seq=2 ttl=64 time=0.846 ms
+
+你应该可以 ping 有线客户端和无线客户端，而 DHCP 客户端应该自动登记到 DNS 表中。
+
+最后，验证 DNS 是否正确地分配了域名：
+
+    $ hostname xena $ hostname -f xena.alrac.net $ dnsdomainname alrac.net
+ 
+
+讨论
+
+Pyramid Linux 将大量文件挂载到一个临时、可写的文件系统中，比如 /etc/resolv.conf。
+你可以通过查看 /rw 发现它们都是哪些文件，或者运行 ls -l /etc 查看哪些文件被符号链
+接到 /rw 之中。这些都是在启动时从 /ro 中拷贝出来的。这样设计是为了让闪存写入内容。
+所以，你可以编辑 /ro，或者让 /etc 中的文件不可变。
+
+dnsmasq.conf 将一大堆功能塞进了寥寥数行之中，让我们近距离观察一下：
+
+domain-needed不要转发没有点号和域的主机名请求给上游 DNS 服务器。如果该名称不在
+    /etc/hosts 或 DHCP 之内，就会返回一个 “not found” 响应。这意味着不完整的请求
+    （例如，“google” 或 “oreilly”，而不是 google.com 或 oreilly.com）会在离开你的
+    网络之前被消灭。
+    
+bogus-priv即“假的私有查询”。任何私有 IP 范围的反向查询（如 192.168.x.x）都不会向
+    上游转发。如果它们不在 /etc/hosts，或 DHCP 租约文件中，就会返回 “no such
+    domain”。使用 domain-needed 和 bogus-priv 是实践网络和谐的简单选项。
+    
+local=/alrac.net/将你的本地域名放在这里，由此可以让本地域的查询都从 /etc/hosts 和
+    DHCP 响应，并且不会向上游转发。这里的神奇之处在于，可以让你为私有网络选择任何
+    域名，而无须注册。要让这个选项正常工作，你还需要 expand-hosts 和 domain 选项。
+    
+expand-hosts这样可以自动将域名添加到主机名。
+
+domain=alrac.net expand-hosts 查找这里设定的域名。
+    
+interface定义 dnsmasq 应该监听哪块网卡。每个网卡使用一行，如果你有多个网卡的话。
+    
+listen-address=127.0.0.1这告诉 dnsmasq 还要使用它自己的本地缓存，以代替为每个请求
+    查询上游域名服务器。这样会加速来自路由器的查询，而且还能允许路由器使用你本地
+    的 DNS。你可以通过在路由器上 ping LAN 主机的主机名或 FQDN 来验证。
+    
+server server 选项用于多个不同目的，在此，它定义了你的上游 DNS 服务器。
+    
+dhcp-range=lan,192.168.1.100,192.168.1.200,12h定义你的 DHCP 租约池和租期，并且定
+    义一个名为“lan”的网络区域。使用命名区域使你可以将服务器和路由分配给不同的客户
+    端群组和子网，参阅第 3.13 节查看如何实现。
+
+dhcp-max-lease所有 DHCP 租约的最大限值。默认值是 150。你可以设置与所支持地址范围
+    一样多的数值。
+
+
+参阅
+
+ � 第 4.12 节中使用命名区域的样例� man 8 dnsmasq 包含了丰富的关于所有可用命令行选
+ 项的帮助信息，其中多数也是 dnsmasq.conf 的选项。� dnsmasq.conf 也是一个很好的帮
+ 助资源� 在 dnsmasq 主页上可以找到邮件列表存档和优秀的帮助文档：
+ http://www.thekelleys.org.uk/dnsmasq/doc.html � 第 24 章，“管理名称解析”，
+ 《Linux Cookbook》，Carla Schroder 著 (O’Reilly)
+ 
+ 
+4.4 从 DHCP 服务器获取并设定静态 IP 地址
+
+问题
+
+你想要从 DHCP 管理你的 LAN 计算机，而不是一台一台配置它们，所以你不必跑来跑去，总
+是一台一台地调整计算机。你想要通过 DHCP 分配静态和动态的 IP 地址、网关和服务器。
+
+
+解决方案
+
+dnsmasq 可以完全满足需求。从 dnsmasq.conf 分配静态 IP 地址有两种方式。一种是使用
+客户端的 MAC 地址，作为客户端的识别符，象这样：
+
+    dhcp-host=11:22:33:44:55:66,192.168.1.75
+    
+我喜欢的方式是设置主机名：
+
+    dhcp-host=penguina,192.168.1.75
+
+确认 /etc/hosts 中没有设置这样的条目。
+
+唯一必需的客户端配置是主机名，用于 DHCP 客户端在请求新的租约时，将该主机名发送给
+DHCP 服务器。一旦你完成了设置，就可以从服务器控制其它任何东西。
+
+每当你变更 dnsmasq.conf 之后，记得运行 killall dnsmasq。
+
+客户端配置也有一些要注意的地方，可参阅第 4.5 节。
+
+
+讨论
+
+dnsmasq.conf 中的变更很容易测试。重启 dnsmasq 之后，尝试在你的 Linux 客户端上运行
+下列命令：
+
+ifupdown 停止和启动网卡：
+
+    # ifdown eth0 ifup etho
+
+某些时候，那样不能完成任务，所以你还可以尝试：
+
+    # /etc/init.d/network restart /etc/init.d/networking restart
+
+第一条命令用于 Fedora，而第二条命令用于 Debian。你将会看到它从 DHCP 服务器获取了
+你分配给它的地址，而它会将正确的 DNS 服务器地址写入 /etc/resolv.conf。
+
+如果那样做没用的话，重启系统。
+
+通过 ifconfig 查找有线网卡的 MAC 地址，无线网卡则使用 iwconfig。ifconfig 可以看到
+两者，但是并不区分它们。iwconfig 只能识别无线网卡。
+
+当你使用 MAC 地址时，如果你替换了客户端的网卡，不要忘了变更 dnsmasq.conf 中的相关
+条目。
+
+MAC 地址都是唯一的，但是主机名则不是，所以你得小心，不要重复使用主机名。无论如何，
+你都不能有两个同样的主机名。
+
+MAC 地址极为容易被窃听，所以不要认为你将它们当作安全、唯一的识别符，就可以获得任
+何安全性。
+
+
+参阅
+
+ � man 8 dnsmasq 包含了丰富的关于所有可用命令行选项的帮助信息，其中多数也是
+ dnsmasq.conf 的选项。� dnsmasq.conf 也是一个很好的帮助资源� 在 dnsmasq 主页
+ （http://www.thekelleys.org.uk/dnsmasq/doc.html）上可以找到邮件列表存档和优秀的
+ 帮助文档� 第 24 章，“管理名称解析”，《Linux Cookbook》，Carla Schroder 著
+ (O’Reilly)
+
+
+4.5 配置 Linux 和 Windows 静态 DHCP 客户端
+
+问题
+
+同时拥有 Linux 和 Windows 客户端，而且多种 Linux 发行版还会自说自话，你对于如何配
+置 dnsmasq 将静态 IP 地址分配给它们，感到有一点困惑。
+
+
+解决方案
+
+从 DHCP 获取静态 IP 地址的关键是，当客户端请求租约时，将它们的主机名发送给 DHCP
+服务器。
+
+Windows 2000、2003 和 XP 客户端会自动进行。你所要做的就是以常规方式配置它们的
+DHCP 设置。
+
+首先，在所有 Linux 机器上，在 /etc/host 中除了本地域名之外，没有其它任何东西。
+
+多数 Linux 发行版不会配置为默认发送主机名。要修正这个问题，在它们的 DHCP 客户端文
+件中添加一行即可。在 Debian 上，这就是 /etc/dhcp3/dhclient.conf 文件。这个例子用
+于名为 Penguina 的计算机：
+
+    send host-name "penguina";
+    
+你必须还要在 /etc/hostname 中输入主机名：
+
+    penguina
+    
+只要主机名即可。然后，在 /etc/network/interfaces 中设置正常的 DHCP 配置，象这样：
+
+    ##/etc/network/interfaces auto lo iface lo inet loopback
+
+    auto eth0 iface eth0 inet dhcp
+
+在 Fedora 上，每块网卡都会得到它自己的 DHCP 客户端文件，如 /etc/dhclient-eth1。你
+可能需要创建这个文件。它里面有着同样的 send host-name "penguina"; 条目。然后，
+/etc/sysconfig/network-scripts/ifcfg-eth0 中添加这一行：
+
+    DHCP_HOSTNAME=penguina
+    
+确认 /etc/sysconfig/network 中的 HOSTNAME 设置为空。
+
+测试新配置的确定方式就是重启，然后运行这些命令：
+
+    $ hostname penguina $ hostname -f penguina.alrac.net $ dnsdomainname
+    alrac.net
+
+ping 的结果象这样：
+
+    carla@xena:~$ ping penguina PING penguina.alrac.net (192.168.1.75) 56(84)
+    bytes of data.  64 bytes from penguina.alrac.net (192.168.1.75): icmp_seq=1
+    ttl=128 time=8.90 ms carla@penguina:~$ ping penguina PING penguina.alrac.net
+    (192.168.1.75) 56(84) bytes of data.  64 bytes from penguina.alrac.net
+    (192.168.1.75): icmp_seq=1 ttl=64 time=0.033 ms
+
+
+讨论
+
+最常见的问题原因是没有正确配置主机名。检查所有相关的配置文件。
+
+这里是一个 Fedora 上完整的 eth0 配置文件：
+
+    ##/etc/sysconfig/network-scripts/ifcfg-eth0 DEVICE=eth0 ONBOOT=yes
+    BOOTPROTO=dhcp HWADDR=11.22.33.44.55.66 DHCP_HOSTNAME=penguina TYPE=wireless
+    PEERDNS=yes MODE=managed RATE=auto
+
+无论直接修改 Fedora 配置文件，还是使用图形化网络配置器都可以，只是不要同时使用两
+者，因为图形化工具会覆盖你手工编辑的内容。
+
+dnsmasq 会自动将 DHCP 客户端登记到 DNS 中。这是很方便的，而且当你部署 IPv6 时，它
+就不仅止是便利——而是必需的，除非你喜欢记忆和输入那些长长的 IPv6 地址。
+
+dnsmasq 将一大堆复杂的功能塞进了一个短小的配置文件中，而且可以与 BIND、djbdns、
+MaraDNS 以及其它域名服务器一同使用。对于私有的 LAN 服务使用 dnsmasq，而对公共权威
+服务器使用其它域名服务器。这使得保持两者完全独立变得比较简单，它们就该如此。记得
+DNS 服务器的首要规则：将权威服务器和缓存服务器完全严格分开，也就意味着要使用两块
+物理分隔的网卡和不同的 IP 地址。权威服务器不会响应关于其它域的查询，那是像
+dnsmasq 这样的缓存解析器的工作。维持两台独立的服务器也许听起来会需要更多的工作，
+但在实际上，这比试图配置一台单独的服务器来处理两件事，总要简单和安全一些。
+
+
+参阅
+
+ � man 5 dhclient � dnsmasq.conf 也是一个很好的帮助资源� 在 dnsmasq 主页
+ （http://www.thekelleys.org.uk/dnsmasq/doc.html）上可以找到邮件列表存档和优秀的
+ 帮助文档� 第 24 章，“管理名称解析”，《Linux Cookbook》，Carla Schroder 著
+ (O’Reilly)
+
+
+4.6 在 dnsmasq 中加入邮件服务器
+
+问题
+
+你有几台本地的邮件服务器，而且你想让局域网内的主机都知道它们。你该如何通过
+dnsmasq 实现？
+
+
+解决方案
+
+dnsmasq 有一种特殊的邮件服务器记录类型。你需要这三行：
+
+    mx-host=alrac.net,mail.alrac.net,5 mx-target=mail.alrac.net localmx
+
+mx-host 这一行需要域名、服务器名和 MX 优先级三个参数。mx-target 这一行则是服务器
+名称。localmx 意味着所有本地机器都应该使用该服务器。
+
+
+讨论
+
+优先级数值 5 说明该服务器的优先级比其它更大数值的服务器高，该数值一般从 10 开始，
+然后是 10 的倍数。如果你只有一台邮件服务器，也应该给它指定一个优先级，以便客户端
+访问。
+
+
+参阅
+
+ � man 5 dhclient � dnsmasq.conf 也是一个很好的帮助资源� 在 dnsmasq 主页
+ （http://www.thekelleys.org.uk/dnsmasq/doc.html）上可以找到邮件列表存档和优秀的
+ 帮助文档� 第 24 章，“管理名称解析”，《Linux Cookbook》，Carla Schroder 著
+ (O’Reilly)
+
+
+4.7 使 WPA2-Personal 和 WPA-Enterprise 一样安全
+
+问题
+
+对于放置一台不安全的无线接入点在那里，你感到十分紧张，而且你确实想在做其它事情之
+前，先把它给锁定了。你已经确认，在用的所有无线网卡都支持 WPA2，所以一切准备完毕。
+你不想运行一台 RADIUS 验证服务器，但是为所有客户端使用同一个共享密钥看上去并不安
+全。难道没有某种折衷方案吗？
+
+
+解决方案
+
+不错，是有一种。Pyramid Linux 附带 hostapd，这是一个用户层守护进程，用于接入点以
+及验证服务器。本节将会向你介绍如何分配不同的预共享密钥给各个客户端，而不是每个客
+户端都用同一个密钥。而且，我们还将使用一种非常健壮的 AES-CCMP 加密算法，代替 WPA
+和 WEP 所使用较弱的 RC4 加密。
+
+首先，运行 /sbin/rw 使 Pyramid 文件系统可写，然后创建或编辑 /etc/hostapd.conf 文
+件：
+
+    ##/etc/hostapd.conf interface=ath0 bridge=br0 driver=madwifi debug=0
+    ssid=alrac-net macaddr_acl=0 auth_algs=3 wpa=1
+    wpa_psk_file=/etc/hostapd_wpa_psk wpa_key_mgmt=WPA-PSK wpa_pairwise=CCMP
+
+下一步，创建 /etc/hostapd_wpa_psk，其中包括了共享的明文口令：
+
+    00:00:00:00:00:00 waylongpassword
+    
+然后，编辑 /etc/network/interfaces，使 hostapd 随 br0 网卡而启动。将这两行加入
+br0 条目的末尾：
+
+    up hostapd -B /etc/hostapd.conf post-down killall hostapd
+
+运行 /sbin/ro，然后重启网络：
+
+    pyramid:~# /etc/init.d/networking restart
+
+现在，抓一台 Linux 客户端 PC 用于测试。在客户端上，创建一个
+/etc/wpa_supplicant.conf 文件，其中包含如下几行，记得要使用 /etc/hostapd_wpa_psk
+中你自己的 ESSID 和超级秘密口令：
+
+    ##/etc/wpa_supplicant.conf network={ ssid="alrac-net" psk="waylongpassword"
+    pairwise=CCMP group=CCMP key_mgmt=WPA-PSK }
+
+关闭客户端的无线网卡，然后测试密钥交换：
+
+    # ifdown ath0 wpa_supplicant -iath0 -c/etc/wpa_supplicant.conf -Dmadwifi -w
+    # Trying to associate with 00:ff:4a:1e:a7:7d (SSID='alrac-net' freq=2412
+    # MHz) Associated with 00:ff:4a:1e:a7:7d WPA: Key negotiation completed with
+    # 00:ff:4a:1e:a7:7d [PTK=CCMP GTK=CCMP] CTRL-EVENT-CONNECTED - Connection to
+    # 00:2b:6f:4d:00:8e
+    
+以上演示了一次成功的密钥交换，而且它确认正在使用 CCMP 密码，你想知道这个信息，是
+因为它比 WEP 所使用的 RC4 流密更为健壮。按下 Ctrl-C 来结束密钥交换测试。这样，你
+就可以添加更多的客户端，给每个客户端分配一个唯一的密钥。你所要做的就是将它们在
+/etc/hostapd_wpa_psk 中按序排列，并且用口令匹配它们的 MAC 地址：
+
+    00:0D:44:00:83:CF uniquetextpassword 00:22:D6:01:01:E2 anothertextpassword
+    23:EF:11:00:DD:2E onemoretextpassword
+
+现在，你有了很强的 AES-CCMP 加密，而且如果某个用户丢失了她的密钥，你也无需改变所
+有其它密钥。撤销用户的访问权限，只要注释或删除他们的相关密钥即可。
+
+你可以在客户端通过配置 wpa_supplicant 随无线网卡启动，使其固化。在 Debian 上，这
+么做：
+
+    ##/etc/network/interfaces auto ath0 iface ath0 inet dhcp pre-up
+    wpa_supplicant -iath0 -Dmadwifi -Bw
+    -c/etc/wpa_supplicant/wpa_supplicant.conf post-down killall -q
+    wpa_supplicant
+
+在 Fedora 上，将这一行添加至 /etc/sysconfig/network-scripts/ifup-wireless：
+
+    wpa_supplicant -ieth0 -c/etc/wpa_supplicant/wpa_supplicant.conf -Dmadwifi
+    -Bw
+    
+确认你在 wpa_supplicant.conf 中设置的文件路径是正确的，你用 -i 指定了正确的网卡，
+而且你用 -D 选项指定了正确的驱动程序。
+
+
+讨论
+
+当你测试密钥交换时，需要指定 WIC（在这个例子中，就是 -Dmadwifi）的驱动程序。man
+8 wpa_supplicant 会列出所有选项。wext 驱动程序是一个通用的 Linux 内核驱动。你会发
+现文档中也推荐使用这个驱动。最好先尝试网卡本身的驱动，如果遇到问题，则尝试一下
+wext。
+
+例子中所使用的口令是很糟糕的，不应该在实际工作中使用。不妨将你的口令设为最长的
+63 个字符，没有任何单词或名字，只是随机的字母和数字。尽量避免使用标点符号，因为某
+些 Windows 客户端可能无法正确处理它们。有很多随机密码发生器，随处可见，只要搜索一
+下就能找到。
+
+Windows XP 需要 SP2 才能支持 WPA，此外还需要无线网卡随带的客户端软件。旧版本的
+Windows 有可能获得无线网卡所需的客户端软件。当然也有可能无法得到——你得小心购买。
+
+加密一个明文口令需要花费一些计算能力，所以使用明文口令会降低一点速度。你可以使用
+wpa_password 来加密你的口令，然后将已加密的字符串拷贝到相应位置：
+
+    $ wpa_passphrase alrac-net w894uiernnfif98389rbbybdbyu8i3yenfig87bfop
+    network={ ssid="alrac-net" #psk="w894uiernnfif98389rbbybdbyu8i3yenfig87bfop"
+    psk=48a37127e92b29df54a6775571768f5790e5df87944c26583e1576b83390c56f }
+
+现在你的客户端和接入点就不用在口令上耗费那么多 CPU 资源了。加密的密钥在
+wpa_supplicant.conf 中没有引用标记，而明文口令有。
+
+在我们起初的例子中，00:00:00:00:00:00 意味着“接受所有 MAC 地址”。
+
+你可以通过在接入点和客户端上执行 iwlist ath0 key 命令来查看实际使用的密钥。
+
+你的接入点支持几乎所有的客户端：Linux、Mac OS X、Windows、Unix、BSD...任何支持该
+协议的客户端都能正常工作。
+
+NetworkManager 和 Kwlan 是很好的图形化 Linux 客户端网络管理工具。NetworkManager
+是为所有 Linux 桌面和窗口管理器设计的，随附于 Gnome，而 Kwlan 则是 KDE 的一部分。
+两者均支持描述、密钥管理和简单的网络切换。
+
+当你使用以太网桥时，确认你在 /etc/hostapd.conf 中设置了无线和桥接网卡。
+
+hostapd.conf 支持基于 MAC 地址的访问控制。你完全可以使用这种功能，但是，我认为它
+们是在浪费时间，因为 MAC 地址欺骗是再容易不过的了。
+
+HostAP 原本是一个之支持 Prism 无线芯片的项目，但是它现在支持这些驱动程序：
+
+ � 用于 Prism2/2.5/3 的 Host AP 驱动程序� madwifi (Atheros ar521x) � Prism54.org
+ (Prism GT/Duette/Indigo) � BSD 的 net80211 层
+
+
+参阅
+
+ � Pyramid Linux 不包含文档，所以你应当在 PC 上安装本章所提及的应用程序，或者依赖
+ Google 的帮助亦可� wlanconfig 是 MadWiFi-ng 的一部分� man 8 wlanconfig � 缺省的
+ hostapd.conf 充满了丰富的注释� 缺省的 wpa_supplicant.conf 很有帮助� 《802.11 无
+ 线网络权威指南》，Matthew Gast 著 (O’Reilly) � MadWiFi.org: http://madwifi.org/
+ 
+ 
+4.8 使用 RADIUS 服务器进行企业级验证
+
+问题
+
+前一节描述了一种平滑的方法，使你可以得到无线网络客户端的独立密钥，但这仍然不是一
+种正规的公共密钥基础设施（PKI），它可用于更大规模的部署，安全性更强。你已决定要运
+行一台独立的 RADIUS 服务器，用于无线网络验证，因为它可以提供更多的安全性和灵活性。
+只要你想，就能够用它来进行所有的网络验证工作，不只是无线网络，而且可以随着你自己
+的节奏逐步扩展。所以，你该如何将一台 RADIUS 服务器应用于无线网络验证呢？
+
+
+解决方案
+
+将 FreeRADIUS 与 OpenSSL 一齐使用。需要四个步骤来完成这件工作：
+
+ 1. 安装并配置 FreeRADIUS 服务器。2. 创建并分发 OpenSSL 服务器和客户端证书。3. 配
+ 置你的无线接入点。4. 配置客户端请求。
+ 
+你的 WAP 会变成一台网络访问服务器（NAS），是因为它可以将用户验证的工作传递给
+FreeRADIUS 服务器。
+
+最简便的低成本方式，是使用操作系统发行版的软件包管理器来安装 FreeRADIUS。如果你喜
+欢从源码安装，参考源码包中的 INSTALL 文档即可。
+
+本节中需要一个使用可扩展验证协议－传输层安全（EAP-TLS）验证的 PKI，这就意味着服务
+器和客户端都必须相互之间通过 X.509 证书验证。所以，你将需要：
+
+ � 你自己的证书权威� 服务器私钥和 CA 签发的证书� 每客户端一个唯一的私钥和一个 CA
+ 签发的证书
+
+这是你可以使用的最强的验证方式。参阅第 9.5 节，学习如何通过简单方式，使用
+OpenVPN 优秀的帮助脚本实现。如果你没有 OpenVPN，可以从
+OpenVPN.net（http://openvpn.net/）获取相关脚本。
+
+有两件事你要采用不同方式实现。首先，使用密码保护的客户端证书：
+
+    # ./build-key-pass [client hostname]
+
+还有，你要为 Windows 客户端创建 PK12 证书：
+
+    # ./build-key-pkcs12 [client hostname]
+
+在本节中，证书权威、服务器私钥和服务器公钥都保存在 /etc/raddb/keys 中。该目录的模
+式应该设为 0750，属主应该是 root 和你的 Linux 发行版创建的 FreeRADIUS 组。在
+Debian 上，为 root:freerad。在 Fedora 上，root:radiusd。你将需要编辑这些
+FreeRADIUS 文件：
+
+    /etc/raddb/clients.conf /etc/raddb/users /etc/raddb/eap.conf
+    /etc/raddb/radiusd.conf
+
+Debian 用户应查看 /etc/freeradius，而不是 /etc/raddb。
+
+首先，在 clients.conf 中告诉 FreeRADIUS 你的无线接入点或多个点的相关信息，每个
+WAP 一段。你可从一个干净的新文件开始，而不是往缺省文件中添加内容：
+
+    ##/etc/raddb/clients.conf client 192.168.1.50 { secret = superstrongpassword
+    shortname = wap1 nastype = other }
+
+然后，在 users 文件中列出授权用户的登录名，以及一则针对不在该文件所列用户的拒绝消
+息。用户名就是客户端证书上的 Common Name。将他们添加到现有的 users 文件中：
+
+    ##/etc/raddb/users "alrac sysadmin" Auth-Type := EAP "terry rockstar"
+    Auth-Type := EAP "pinball wizard" Auth-Type := EAP DEFAULT Auth-Type :=
+    Reject Reply-Message = "I hear you knocking, but you can't come in"
+
+现在，创建两个文件，包含 EAP 所需的随机数据。这些文件必须为 root 和 FreeRADIUS 组
+所有，只让文件属主可读：
+
+    # openssl dhparam -check -text -5 512 -out /etc/raddb/dh dd if=/dev/random
+    # of=/etc/raddb/random count=1 bs=128 chown root:radiusd /etc/raddb/dh chown
+    # root:radiusd /etc/raddb/random chmod 0640 /etc/raddb/dh chmod 0640
+    # /etc/raddb/random
+
+确认你使用了操作系统发行版所设正确的 RADIUS 组。
+
+eap.conf 是配置 EAP 模块的地方。在现有的文件中寻找并编辑这几行，使用你自己的文件
+名：
+
+    ##/etc/raddb/eap.conf default_eap_type = tls tls { private_key_password =
+    [your password] private_key_file = /etc/raddb/keys/xena.crt certificate_file
+    = /etc/raddb/keys/xena.key CA_file = /etc/raddb/keys/ca.crt dh_file =
+    /etc/raddb/keys/dh2048.pem random_file = /etc/raddb/keys/random
+    fragment_size = 1024 include_length = yes }
+
+radiusd.conf 体积庞大，充满了有助于理解的注释，所以我将只展示你可能需要变更的内容。
+在 Authorization 模块中，确认 eap 所在行未注释：
+
+    ##/etc/raddb/radiusd.conf Authorization. First preprocess (hints and
+    # huntgroups files), authorize { ...  eap ...  }
+
+然后，在 Authentication 模块中，确认 eap 所在行未注释：
+
+    # Authentication.  authenticate { ...  eap ...  }
+
+最后，确认这两行未注释，而且输入了正确的用户名和组名。内容可能有所不同，不妨先检
+查一下你所使用的发行版相关设置：
+
+    user = radiusd group = radiusd
+
+如果 FreeRADIUS 正在运行，就先关掉它，然后运行这些命令进行测试：
+
+    # freeradius -X ...  "Ready to process requests" # radtest test test
+    localhost 0 testing123
+
+第一条命令以调试模式启动。第二条命令发送了一个假的验证测试，结果应该会失败。你想
+要看到的就是 FreeRADIUS 响应该测试。调试模式会产生大量有用的输出内容，所以如果配
+置中有任何错误，你就能顺藤摸瓜将它们搞定。
+
+
+讨论
+
+最麻烦的地方是弄好证书，但幸运的是，Easy-RSA 脚本可以简化这个过程。还有一个较好的
+替代品，就是优秀的图形化 PKI 管理器 TinyCA（http://tinyca.sm-zone.net/）。
+
+FreeRADIUS 有一种平滑的特性是无需使用证书撤销列表（CRL），尽管谁也挡不住你想要这
+么做，因为撤销一个用户已简单到只要将他们从 users 文件中移除即可。
+
+各种 Linux 发行版都以不同的方式处理 FreeRADIUS 用户和组。某些版本使用 nobody。
+Debian 则创建了一个 freerad 用户和组。以非特权用户身份运行 FreeRADIUS 很重要，所
+以得确认 radiusd.conf 中的用户和组所在行设置正确。
+
+如果你有多个 WAP，不妨基于子网而不是单独的 WAP 来控制访问：
+
+    ##/etc/raddb/clients.conf client 192.168.0.0/24 { secret =
+    superstrongpassword shortname = wap_herd nastype = other
+
+这比较不安全，因为它在所有接入点上都使用了同样的密码，但这样管理起来会比较方便。
+
+
+参阅
+
+ � man 1 openssl � man dhparam � 缺省的 eap.conf、radiusd.conf、clients.conf 和
+ users 文件都是很好的帮助参考资料� 《RADIUS》，Jonathan Hassell 著(O’Reilly)，深
+ 入学习如何运行一台 RADIUS 服务器� The FreeRADIUS Wiki:
+ http://wiki.freeradius.org/ � TinyCA (http://tinyca.sm-zone.net/) 是一种不错的图
+ 形化工具，用于创建和管理 PKI，以及导入导出证书和密钥� 第 9.5 节
+
+
+4.9 配置无线接入点以使用 FreeRADIUS
+
+问题
+
+好了，设置 FreeRADIUS 很好玩，现在你该如何让 WAP 来使用它呢？
+
+
+解决方案
+
+你的这个基于 Pramid Linux 的 WAP 需要在 /etc/hostapd.conf 中写几行配置。在这个例
+子里，FreeRADIUS 服务器的 IP 地址是 192.168.1.250：
+
+    ##/etc/hostapd.conf interface=ath0 bridge=br0 driver=madwifi debug=0
+    ssid=alrac-net ieee8021x=1
+
+    auth_algs=0 eap_server=0 eapol_key_index_workaround=1
+
+    own_ip_addr=192.168.1.50 nas_identifier=pyramid.alrac.net
+    auth_server_addr=192.168.1.250 auth_server_port=1812
+    auth_server_shared_secret=superstrongpassword
+
+    wpa=1 wpa_key_mgmt=WPA-EAP wpa_pairwise=TKIP wpa_group_rekey=300
+    wpa_gmk_rekey=640
+
+编辑 /etc/network/interfaces，使 hostapd 随 LAN 网卡而启动。在 LAN 网卡的配置末尾
+加上这两行：
+
+    pre-up hostapd -B /etc/hostapd.conf post-down killall hostapd
+
+重启网络：
+
+    pyramid:~# /etc/init.d/networking restart
+
+工作基本完成。参阅下一节中关于客户端配置的相关内容。
+
+
+讨论
+
+各种不同的无线接入点均以不同的方式配置。它们都有的三个部分是：
+
+ � FreeRADIUS 服务器 IP 地址� FreeRADIUS 端口：1812 是默认的� FreeRADIUS 密钥：共
+ 享的密码
+ 
+记住，你不必担心接入点上的密钥和证书。这只是一种中介手段而已。
+
+
+参阅
+
+ � 《RADIUS》，Jonathan Hassell 著(O’Reilly)，深入学习如何运行一台 RADIUS 服务器
+ � The FreeRADIUS Wiki: http://wiki.freeradius.org/ � hostapd.conf 样例
+ 
+
+4.10 通过 FreeRADIUS 验证客户端
+
+问题
+
+现在你有了可用的接入点和 FreeRADIUS 服务器，你的客户端应该如何跟它们通讯呢？
+
+
+解决方案
+
+所有的客户端都需要一份 ca.crt 拷贝。Mac 和 Linux 客户端有它们自己的
+[hostname].crt 和 [hostname].key 文件。Windows 客户端使用 [hostname].p12。
+
+你的 Windows 和 Mac 客户端具有内置的图形化工具，可以进行证书导入和管理，以及配置
+请求等。你该在 Linux 上做什么？我尚未找到任何比编辑文本文件更简单的方法。回到第
+4.7 节，从配置 /etc/wpa_supplicant.conf 开始。将其变更如下：
+
+    ## /etc/wpa_supplicant.conf network={ ssid="alrac-net" scan_ssid=1
+    key_mgmt=WPA-EAP pairwise=CCMP TKIP group=CCMP TKIP eap=TLS identity="alice
+    sysadmin" ca_cert="/etc/cert/ca.crt" client_cert="/etc/cert/stinkpad.crt"
+    private_key="/etc/cert/stinkpad.key"
+    private_key_passwd="verysuperstrongpassword" }
+
+identity 的值来自 FreeRADIUS 服务器上的 /etc/raddb/users。证书和密钥可以存储在任
+何地方，只要 wpa_supplicant.conf 中正确配置指向它们即可。
+
+继续按第 4.7 节所述测试并完成 wpa_supplicant 的配置。
+
+
+讨论
+
+确认 .key 文件的模式为 0400，并且为你的 Linux 用户所有。.crt 文件的模式为 0644，
+也为该用户所有。
+
+你可以在 wpa_supplicant.conf 中有多个为不同网络设置的条目。确认使用：
+
+    network{ }
+
+格式分别设置。
+
+NetworkManager（http://www.gnome.org/projects/NetworkManager/）是最好的 Linux 工
+具，可以很方便地管理多个网络描述文件。它与 Gnome 捆绑在一起，而且在所有 Linux 发
+行版上可用。
+
+
+参阅
+
+ � man 8 wpa_supplicant � man 5 wpa_supplicant.conf
+
+
+4.11 连接 Internet 并使用防火墙
+
+问题
+
+终于快要完成 LAN 相关的配置工作，可以将 Internet 引入你的局域网了。你的无线网络已
+加密，你的 LAN 服务运转正常，而你的用户想要 Internet。所以你得配置 WAN 网卡并且搭
+建一个坚固的 iptables 防火墙。
+
+
+解决方案
+
+小菜一碟。首先，配置你的 WAN 网卡，然后设置一个 iptables 防火墙。（参阅第 3 章，
+学习如何完成这些工作。）你将需要对 /usr/local/bin/fw-nat 做一些简单变更，以允许网
+络流量通过你的网桥。添加如下两行：
+
+    $ipt -A INPUT -p ALL -i $LAN_IFACE -s 192.168.1.0/24 -j ACCEPT $ipt -A
+    FORWARD -p ALL -i $LAN_IFACE -s 192.168.1.0/24 -j ACCEPT
+
+当然要使用你自己的子网。然后，将 LAN_IFACE 值设为 br0：
+
+    LAN_IFACE="br0"
+    
+根据第 3 章的相关内容重启并测试所有部分，就完成配置了。
+
+
+讨论
+
+以太网桥将子网接入一个单独的广播域，每次广播流量都会到达各处。网桥很容易搭建，而
+且对于你的用户来说是透明的。你的子网就如一个单独的网段那样工作，所以 LAN 服务不需
+要额外调整就能工作，比如网络打印、Samba 服务器 和网络邻居等等。你可以将计算机到处
+移动，而无须给它们分配新地址。
+
+桥接是一种低效率的方式，因为它会产生很多广播流量。所以，它不能随意扩展。以太网桥
+在数据链路层（OSI 参考模型第二层）运作。它可以看到 MAC 地址，但是看不到 IP 地址。
+桥接流量不能用 iptables 过滤，如果你想要这么做的话，可以使用 ebtables，这是为桥接
+防火墙设计的。
+
+路由可以提供针对网段的更多控制权，你可以通过任何方式过滤流量。这比桥接更为有效，
+因为它不会吐出那么多广播数据。路由可以无限扩展，有 Internet 的现状为证。其在 LAN
+中的主要劣势是，需要进行更多的工作来实现。
+
+参阅第 4.12 节，学习如何在无线接入点上使用路由代替桥接。
+
+
+参阅
+
+ � 第 6 章
+ 
+ 
+4.12 使用路由代替桥接
+
+问题
+
+你宁可在两个 LAN 网段之间使用路由，也不要用桥接，因为路由可以提供更好的性能和全方
+位的控制。例如，你可以设置一条单独的链路，只为访客提供 Internet 访问，并且让他们
+处于你的网络之外。否则，你就要采取一些隔离措施，并且为每个网段设置不同的 LAN 服务。
+你知道这需要费些工夫才能完成设置，但是那并不会太麻烦，你只想知道怎么实现。
+
+
+解决方案
+
+
+
+
+    4.13 探测无线网卡 4.14 改变 Pyramid 路由器的主机名 4.15 关闭天线分集4.16 管理
+    dnsmasq 的 DNS 缓存4.17 管理 Windows 的 DNS 缓存 4.18 在系统启动时更新时间
+
