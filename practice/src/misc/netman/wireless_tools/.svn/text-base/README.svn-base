@@ -1,0 +1,6 @@
+README
+*The iwlib.c and iwlib.h is copy from wireless_tool.29
+
+*The libiw.so is GPL license, we need to avoid violate GPL, so let's copy the code to here.
+
+ 

@@ -1,0 +1,102 @@
+menu "Misc Configuration"
+
+# CAS
+menuconfig CONF_CAS
+	bool "Content Aggregation Service"
+	default n
+
+if CONF_CAS
+source "src/misc/cas/Kconfig
+choice
+	prompt "Content Aggregation Server Version"
+	depends on CONF_CAS
+	default CONF_CAS_I
+
+config CONF_CAS_I
+	bool "v1.0"
+
+config CONF_CAS_II
+	bool "v2.0"
+endchoice
+endif
+#######################################################
+
+# DiskManager
+menuconfig CONF_DISKMANAGER
+	bool "Disk Manager Service"
+	default n
+
+if CONF_DISKMANAGER
+source "src/misc/disk_manager/Kconfig"
+endif
+
+# UserAgent
+menuconfig CONF_CHANNELIZED
+	bool "User Agent"
+	default n
+
+if CONF_CHANNELIZED
+source "src/misc/channelizedengine/Kconfig
+endif
+######################################################
+
+# Network Manager
+menuconfig CONF_NETWOKR
+	bool "Network Manager"
+	default y
+
+if CONF_NETWOKR
+source "src/misc/dmacfg/Kconfig"
+endif
+######################################################
+
+config CONF_DNS_DAEMON
+	bool "DNS Daemon"
+	default y
+
+config CONF_DMA_YOUTUBE
+	bool "Youtube"
+	default n
+
+config CONF_DMA_PICASA
+	bool "Picasa"
+	default n
+
+config CONF_SAMBA
+	bool "Samba Client"
+	default n
+
+config CONF_SAMBA_SERVER
+	bool "Samba Server"
+	default n
+
+config CONF_SAMBA_CONF_PATH
+	string "Samba Server Configuration file"
+	default "/tmp/smb.conf"
+	depends on CONF_SAMBA_SERVER
+
+config CONF_SAMBA_SERVER_SCRIPT
+	string "Samba Server Script"
+	default "/bin/run_samba"
+	depends on CONF_SAMBA_SERVER
+
+config CONF_SAMBA_WORKGROUP
+	string "Samba Server Workgroup"
+	default "WorkGroup"
+	depends on CONF_SAMBA_SERVER
+
+config CONF_MEDIA_SERVER
+	bool "Media Server"
+	default n
+
+config CONF_IO_DAEMON
+	bool "IO daemon"
+	default n
+	help
+	  IO daemon is a product related service used to provide generic io service to the whole system.
+
+config CONF_FIRMWARE_UPGRADING_DAEMON
+	bool "firmware upgrading daemon"
+	default y
+
+endmenu

@@ -1,0 +1,17 @@
+5. 2006/1/04, Wills Yin, wills_yin@alphanetworks.com
+   - Split the src/securesoho.c into 4 files: 
+   - securesoho_config.c, securesoho_network.c, securesoho_firmware.c, securesoho.c
+   - Update the the Makefile according osd/ewm style.
+
+4. 2005/8/28, Wills Yin, wills_yin@alphanetworks.com
+   - Add sap/sdp to parse sap/sdp packet.
+
+3. 2004/6/03, Erwin Pan, chpan@redsonic.com
+   - Add folder: src/transcode
+   - Add draft of design document: src/transcode/DevelopPlan_for_TranscodingAPI.doc
+
+2. 2004/5/27, Walker Wang, wwang@redsonic.com
+   - remove gformat.[hc] files from cvs because Erwin will in charge of it.
+
+1. 2004/5/18, Walker Wang, wwang@redsonic.com
+   - create this file

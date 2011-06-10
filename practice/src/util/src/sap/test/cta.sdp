@@ -1,0 +1,10 @@
+v=0
+o=JoeFakename 81b8a1b77068d06e1c8190825253066f v1.0 IN IP4 127.0.0.1
+s=Call to Arms
+i=Government radio call-in show.
+u=http://fakehost.com/streams/cta.ram
+e=Joe Fakename <famename@fakehost.com>
+p=1-312-976-2600 (Joe Fakename)
+t=0 0
+m=audio/mp3 3456 RTP/AVP 0
+a=recvonly

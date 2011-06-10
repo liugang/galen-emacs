@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/src/sap/test
+END
+combo2.sdp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/src/sap/test/combo2.sdp
+END
+testsdp.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/src/sap/test/testsdp.c
+END
+dtm.sdp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/src/sap/test/dtm.sdp
+END
+psr.sdp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/src/sap/test/psr.sdp
+END
+cta.sdp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/src/sap/test/cta.sdp
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/src/sap/test/Makefile
+END

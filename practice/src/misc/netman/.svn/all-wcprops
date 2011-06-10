@@ -1,0 +1,107 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/3gdma/!svn/ver/84353/trunk/core_repos/src/misc/netman
+END
+pppoe-client.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/pppoe-client.c
+END
+udev_util.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/3gdma/!svn/ver/82752/trunk/core_repos/src/misc/netman/udev_util.c
+END
+udev_util.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/udev_util.h
+END
+nm_rtnl.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/3gdma/!svn/ver/82815/trunk/core_repos/src/misc/netman/nm_rtnl.c
+END
+wireless_setup_tool.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/wireless_setup_tool.c
+END
+network_daemon.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/3gdma/!svn/ver/82959/trunk/core_repos/src/misc/netman/network_daemon.c
+END
+dbus_service.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/3gdma/!svn/ver/82710/trunk/core_repos/src/misc/netman/dbus_service.c
+END
+nm_rtnl.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/nm_rtnl.h
+END
+objects.mk
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/3gdma/!svn/ver/84353/trunk/core_repos/src/misc/netman/objects.mk
+END
+iwevent.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/iwevent.c
+END
+wireless_setup.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/wireless_setup.h
+END
+dbus_service.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/dbus_service.h
+END
+iwevent.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/iwevent.h
+END
+network_util.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/network_util.c
+END
+dhcp-client.c
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/dhcp-client.c
+END
+network_util.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/3gdma/!svn/ver/81136/trunk/core_repos/src/misc/netman/network_util.h
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/3gdma/!svn/ver/84201/trunk/core_repos/src/misc/netman/Makefile
+END

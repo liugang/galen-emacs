@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/3gdma/!svn/ver/84442/trunk/core_repos/src/util
+END
+objects.mk
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/3gdma/!svn/ver/83361/trunk/core_repos/src/util/objects.mk
+END
+bincopy.c
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/bincopy.c
+END
+ChangeLog
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/ChangeLog
+END
+autotest.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/autotest.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/3gdma/!svn/ver/81361/trunk/core_repos/src/util/Makefile
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/3gdma/!svn/ver/80263/trunk/core_repos/src/util/README
+END
