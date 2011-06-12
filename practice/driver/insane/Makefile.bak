@@ -1,0 +1,94 @@
+#
+# Makefile
+#
+##########
+
+# Comment/uncomment the following line to enable/disable debugging
+DEBUG = y
+
+# Change it here or specify it on the "make" commandline
+INCLUDEDIR = /usr/src/linux/include
+
+INSTALL = install -c
+INSTALLBIN = $(INSTALL) -m 755
+INSTALLLIB = $(INSTALL) -m 644
+
+ifndef PREFIX
+  PREFIX = /usr/local
+endif
+
+# Extract version number from headers.
+VER = $(shell awk -F\" '/REL/ {print $$2}' $(INCLUDEDIR)/linux/version.h)
+MODDIR = /lib/modules/$(VER)/misc
+SBINDIR = $(PREFIX)/sbin
+
+############## no more editing...
+
+INSTALLDIRS =  $(MODDIR) $(SBINDIR)
+
+CLIENTOBJS = insanely.o
+CLIENTS =  $(CLIENTOBJS:.o=)  
+
+ifneq ($(DEBUG),)
+  DEBFLAGS = -O -g -DINSANE_DEBUG # "-O" is needed to expand inlines
+  LDFLAGS =
+else
+  DEBFLAGS =  -O3 -fomit-frame-pointer
+  LDFLAGS = -s
+endif
+
+CFLAGS = -Wall $(DEBFLAGS)
+CFLAGS += -I$(INCLUDEDIR)
+
+%.i: %.c
+	$(CC) $(CFLAGS) -E $^ -o $@
+
+%.S: %.c
+	$(CC) $(CFLAGS) -S $^ -o $@
+
+
+
+TARGET = insane
+SRC = insane.c
+
+# force make depend
+ifneq (.depend,$(wildcard .depend))
+all: depend
+endif
+
+all: $(TARGET).o $(CLIENTOBJS) $(CLIENTS) TAGS
+
+$(TARGET).o:
+	$(CC) $(CFLAGS) -DMODULE $< -c -o $@
+
+install: all
+	install -d $(MODDIR) $(SBINDIR)
+	install -c $(TARGET).o $(MODDIR)
+	install -c $(TARGET).o /lib/modules/misc
+	@-depmod -a 2> /dev/null
+	install -c $(CLIENTS) $(SBINDIR)
+
+uninstall:
+	cd $(MODDIR) && rm $(TARGET).o
+	cd /lib/modules/misc && rm $(TARGET).o
+	cd $(SBINDIR) && rm $(CLIENTS)
+
+clean:
+	rm -f *.o *.i *.S *~ */*~ */*/*~ core $(CLIENTS)
+
+tar:
+	n=`basename \`pwd\``; cd ..; tar cvf - $$n | gzip > $$n.tar.gz
+
+distrib: clean tar
+
+depend dep:
+	$(CC) -MM *.c > .depend
+
+TAGS:
+	etags *.[ch]
+
+ifeq (.depend,$(wildcard .depend))
+include .depend
+endif
+
+
