@@ -386,7 +386,7 @@ int main(int argc, char **argv)
 
 	wlan_driver_init();
 
-	/* Open udev handle */
+	/* Open rtnl handle */
 	if(nm_rtnl_handle_init(&rth) < 0) {
 		perror("Can't initialize rtnetlink handle");
 		return(1);
