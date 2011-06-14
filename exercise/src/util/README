@@ -1,0 +1,53 @@
+Copyright (c) 2005, Redsonic, inc.  All rights reserved.
+
+DESCRIPTION
+-----------
+This directory is a collaborative general purpose utility APIs for OSD/Render/MediaServer. It aims to provide a robust and concise interface to the caller.It supports HTTP, String, Multimedia Parser Library, and Platform related config and network configure APIs, and maybe a general purpose cryptography library in the future.
+
+Bugs
+--------
+Please report bugs to <https://211.23.32.242/bugzilla>
+
+OVERVIEW
+--------
+The util toolkit includes:
+securesoho:
+    It inludes routines for the following: Set and Get key-value pairs from the config files; Configure wired and wireless lan.
+
+intl
+   minigettext for multilan
+
+string 
+   It support APIs for string operations:EndsWith/StartsWith/Indexof and escape and unescape, ascii to utf-8, utf-8 to ascii etc.
+
+mpl 
+   This part support Multimedia Parser Library for Image/Audio/Video.
+
+transcode
+   image contever for MediaServer
+
+httpApi
+   Support url and option parser API for http
+
+apiwrapper
+   A set of http related API(open/read/connect)
+
+sig_handler
+    For 320/320RD platform, When system crash, it will print out the complete stack and register and FAULT address.
+
+cardread 
+    For 320RD/520X card reader
+
+vfd
+    For 320RD
+
+wcn_leds
+    For 320RD
+
+region 
+    For 320RD
+
+sap
+    For IPSTB, parse the sap/sdp packet received from mutlicast.
+
+test SVN access control

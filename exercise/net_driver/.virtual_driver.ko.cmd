@@ -1,0 +1,1 @@
+cmd_/home/liugang/.emacs.d/practice/net_driver/virtual_driver.ko := ld -r -m elf_i386 -T /usr/src/kernels/2.6.38.6-27.fc15.i686.PAE/scripts/module-common.lds --build-id  -o /home/liugang/.emacs.d/practice/net_driver/virtual_driver.ko /home/liugang/.emacs.d/practice/net_driver/virtual_driver.o /home/liugang/.emacs.d/practice/net_driver/virtual_driver.mod.o

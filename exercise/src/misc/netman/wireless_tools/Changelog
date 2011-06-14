@@ -1,0 +1,55 @@
+2011-04-01
+*author:yan_zhang
+
+*move libiw.so form wireless_tool,
+And we modify and compile it to an object file(.o file).
+
+*Details:
+
+Step 1
+Create folder :  src/misc/dmacfg/dmacfg-2.0/wireless_tools
+
+Step 2
+Copy the iwlib.h and iwlib.c form wireless_tools source code
+to the src/misc/dmacfg/dmacfg-2.0/wireless_tools
+
+Step 3
+Change the follow function name in the wireless/iwlib.h
+	1. iw_get_priv_size	-> iw_get_priv_size2
+	2. iw_sockets_open	-> iw_sockets_open2
+	3. iw_get_priv_info	-> iw_get_priv_info2
+	4. iw_ether_ntop	-> iw_ether_ntop2
+	5. iw_freq2float	-> iw_freq2float2
+	6. iw_sawap_ntop	-> iw_sawap_ntop2
+
+Step4
+Change the follow function name in the wireless/iwlib.c
+	1.iw_get_priv_size	-> iw_get_priv_size2
+	2.iw_sockets_open	-> iw_sockets_open2
+	3.iw_get_priv_info	-> iw_get_priv_info2
+	4.iw_ether_ntop		-> iw_ether_ntop2
+	5.iw_freq2float		-> iw_freq2float2
+
+Step 5
+Modify the src/misc/dmacfg/Makefile
+delete line:
+'COMMON_SYSLIBS_$(USE_WIRELESS_TOOL) +=  -liw'
+
+Step 6
+Modify the src/misc/dmacfg/objects.mk
+	1.Modify the VPATH: 
+		DMACFG_SUB_FOLDER   := dmacfg-2.0
+		WIRELESS_TOOLS_PATH := $(DMACFG_SUB_FOLDER)/wireless_tools
+		VPATH  += $(DMACFG_SUB_FOLDER)  $(WIRELESS_TOOLS_PATH)
+
+	2.Add INCLUDE:
+		    -I$(NM_DIR)/$(WIRELESS_TOOL_PATH) 
+  
+	3.remove the CFLAGS: '-DUSE_WIRELESS_TOOL'
+
+	4.Add object: 'WIRELESS_TOOLS_OBJS := iwlib.o'
+
+	5.Append the object to the NETWORK_DAEMON_OBJS:
+		NETWORK_DAEMON_OBJS := network_daemon.o wireless_setup_tool.o network_util.o udev_util.o dbus_service.o nm_rtnl.o $(WIRELESS_TOOLS_OBJS)
+
+**************************************************************************
