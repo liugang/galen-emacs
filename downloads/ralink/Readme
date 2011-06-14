@@ -1,3 +1,6 @@
+COMPILKIND='codesourcery hardfloat glibc release' mipsel-linux-gnu-gcc -mips32r2 -Wa,-mips32r2 -march=24kf -mtune=24kf -Wall -o net_listen net_event.c -L /opt/mips-4.3.51/mips-linux-gnu/libc/el/lib/
+
+
 DBGPRINT(RT_DEBUG_ERROR, ("message\n"));
 
 find . -name "*ko" |xargs -I{} cp {} ../ko
